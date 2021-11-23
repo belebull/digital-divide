@@ -3,29 +3,26 @@
 
 <head>
 
-	{{> base/meta}}
+  {{> base/meta}}
 
-	<link inline rel='stylesheet' href='bundle.css' />
+  <link inline rel='stylesheet' href='bundle.css' />
 
-	{{> base/font}}
+  {{> base/font}}
 
 </head>
 
 <body>
 
-	{{> base/header 'sticky'}}
+  {{> base/header 'sticky'}}
 
-	<main id='content'>
+  <main id='content'>
 
-		{{> story/intro }}
+    {{> story/intro }}
 
-	</main>
+  </main>
 
-	{{> base/footer }}
-
-
-	<script src='{{basepath}}assets/scripts/d3.v6.0.0.min.js'></script>
-	<script src='bundle.js?version={{timestamp}}' async></script>
+  <script src='{{basepath}}assets/scripts/d3.v6.0.0.min.js'></script>
+  <script src='bundle.js?version={{timestamp}}' async></script>
 </body>
 
 </html>
