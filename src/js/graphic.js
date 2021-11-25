@@ -67,11 +67,13 @@ function generateCountyData(data) {
 }
 
 /*
-USAGE: creates a cartogram of the U.S. with oulinted counties
+USAGE: creates a cartogram of the U.S. that shows availability and usage of broadband internet
 
 SOURCES:
+  - Karim Douieb's 2016 Election Map on Observable (https://observablehq.com/@karimdouieb/try-to-impeach-this-challenge-accepted)
   - County Boundaries by Ian Johnson on Observable (https://observablehq.com/@enjalot/county-boundaries)
 */
+
 function createCartogram(data) {
   const { us, counties } = data;
   // set dimensions of map container for projection
@@ -127,7 +129,6 @@ function init() {
     // generate cartogram
     let counties = topojson.feature(us, us.objects.counties);
     counties = generateCountyData({ counties, broadband });
-    console.log(counties);
     createCartogram({ us, counties });
   });
 }
