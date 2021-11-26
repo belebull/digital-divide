@@ -15,7 +15,6 @@ let type;
 
 function resize() {}
 
-/* USAGE: make sure the county ids are the same in both broadband dataset and the TopoJSON */
 function fixDiscrepancies(data) {
   const { counties, broadband } = data;
   const topoIds = [];
@@ -53,7 +52,6 @@ function fixDiscrepancies(data) {
   return { counties, broadband };
 }
 
-// USAGE: update county properties of TopoJSON
 function generateCountyData(data) {
   // clean county data
   const { counties, broadband } = fixDiscrepancies(data);
@@ -78,7 +76,6 @@ function generateCountyData(data) {
   return updatedCounties;
 }
 
-// USAGE: assigns class based on user-set threshold
 function filterCounties(county, threshold, type) {
   return +county.properties[type] >= threshold
     ? "selected-county"
@@ -86,8 +83,6 @@ function filterCounties(county, threshold, type) {
 }
 
 /*
-USAGE: creates a cartogram of the U.S. counties
-
 SOURCES:
   - Karim Douieb's 2016 Election Map on Observable (https://observablehq.com/@karimdouieb/try-to-impeach-this-challenge-accepted)
   - County Boundaries by Ian Johnson on Observable (https://observablehq.com/@enjalot/county-boundaries)
@@ -137,16 +132,14 @@ function generateCartogram(data) {
   return countyPaths;
 }
 
-// setup event listeners and cartogram
 function setupCartogram(data) {
   const { us, broadband } = data;
-  // add event listeners for cartogram
+
+  // get necessary elements
   percentageSlider = d3.select("#percentage-slider-input");
   percentageText = d3.select("#percentage-text");
   summaryCount = d3.select("#summary-count").node();
   summaryType = d3.select("#summary-type");
-
-  console.log(summaryType.node());
 
   // set inital value of the slider
   threshold = percentageSlider.node().value;
@@ -162,6 +155,10 @@ function setupCartogram(data) {
     .selectAll(".selected-county")
     .size()
     .toLocaleString("en-US");
+
+  // add event listeners
+  percentageSlider.on("input", updateCartogram);
+  summaryType.on("input", updateCartogram);
 }
 
 function updateCartogram() {
@@ -187,8 +184,6 @@ function init() {
     const broadband = result[1];
 
     setupCartogram({ us, broadband });
-    percentageSlider.on("input", updateCartogram);
-    summaryType.on("input", updateCartogram);
   });
 }
 
