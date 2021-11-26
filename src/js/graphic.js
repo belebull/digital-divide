@@ -1,10 +1,17 @@
 /* global d3 */
 import * as topojson from "topojson-client";
-import noUiSlider from "nouislider";
 import loadData from "./load-data";
 
+// elements for cartogram
+let countyPaths;
+
+let summaryCount;
 let percentageSlider;
 let percentageText;
+let summaryType;
+
+let threshold;
+let type;
 
 function resize() {}
 
@@ -46,6 +53,7 @@ function fixDiscrepancies(data) {
   return { counties, broadband };
 }
 
+// USAGE: update county properties of TopoJSON
 function generateCountyData(data) {
   // clean county data
   const { counties, broadband } = fixDiscrepancies(data);
@@ -70,14 +78,21 @@ function generateCountyData(data) {
   return updatedCounties;
 }
 
+// USAGE: assigns class based on user-set threshold
+function filterCounties(county, threshold, type) {
+  return +county.properties[type] >= threshold
+    ? "selected-county"
+    : "unselected-county";
+}
+
 /*
-USAGE: creates a cartogram of the U.S. that shows availability and usage of broadband internet
+USAGE: creates a cartogram of the U.S. counties
 
 SOURCES:
   - Karim Douieb's 2016 Election Map on Observable (https://observablehq.com/@karimdouieb/try-to-impeach-this-challenge-accepted)
   - County Boundaries by Ian Johnson on Observable (https://observablehq.com/@enjalot/county-boundaries)
 */
-function createCartogram(data) {
+function generateCartogram(data) {
   const { us, counties } = data;
   // set dimensions of map container for projection
   const width =
@@ -98,19 +113,16 @@ function createCartogram(data) {
     .fitSize([width, height], topojson.feature(us, us.objects.counties));
   const path = d3.geoPath(projection);
 
-  // set color scales for availability and usage
-  const color = d3
-    .scaleSequential(d3.extent([0, 1]), d3.interpolateRdPu)
-    .nice();
-
   // append state and county boundary paths to the SVG container
-  svg
+  const countyPaths = svg
     .append("g")
     .selectAll("path")
     .data(counties)
     .enter()
     .append("path")
-    .attr("fill", (county) => color(county.properties.availability))
+    .attr("class", (county) =>
+      filterCounties(county, threshold / 100, "availability")
+    )
     .attr("d", path);
 
   svg
@@ -121,6 +133,51 @@ function createCartogram(data) {
     .attr("stroke-linejoin", "round")
     .attr("stroke-width", 0.5)
     .attr("d", path);
+
+  return countyPaths;
+}
+
+// setup event listeners and cartogram
+function setupCartogram(data) {
+  const { us, broadband } = data;
+  // add event listeners for cartogram
+  percentageSlider = d3.select("#percentage-slider-input");
+  percentageText = d3.select("#percentage-text");
+  summaryCount = d3.select("#summary-count").node();
+  summaryType = d3.select("#summary-type");
+
+  console.log(summaryType.node());
+
+  // set inital value of the slider
+  threshold = percentageSlider.node().value;
+  percentageText.text(`at least ${threshold}%`);
+
+  // generate cartogram
+  let counties = topojson.feature(us, us.objects.counties);
+  counties = generateCountyData({ counties, broadband });
+  countyPaths = generateCartogram({ us, counties });
+
+  // set inital value for number of counties
+  summaryCount.textContent = d3
+    .selectAll(".selected-county")
+    .size()
+    .toLocaleString("en-US");
+}
+
+function updateCartogram() {
+  // update threshold + text
+  threshold = percentageSlider.node().value;
+  threshold < 100
+    ? percentageText.text(`at least ${threshold}%`)
+    : percentageText.text(`${threshold}%`);
+
+  // get type and filter counties
+  type = summaryType.node().value;
+  countyPaths.attr("class", (d) => filterCounties(d, threshold / 100, type));
+  summaryCount.textContent = d3
+    .selectAll(".selected-county")
+    .size()
+    .toLocaleString("en-US");
 }
 
 function init() {
@@ -129,25 +186,9 @@ function init() {
     const us = result[0];
     const broadband = result[1];
 
-    // generate cartogram
-    let counties = topojson.feature(us, us.objects.counties);
-    counties = generateCountyData({ counties, broadband });
-    createCartogram({ us, counties });
-
-    // add event listeners for cartogram
-    percentageSlider = d3.select("#percentage-slider-input");
-    percentageText = d3.select("#percentage-text");
-
-    // set inital value of the slider
-    percentageText.text(`at least ${percentageSlider.node().value}%`);
-
-    // change slider value on input
-    percentageSlider.on("input", function () {
-      // eslint-disable-next-line no-unused-expressions
-      this.value < 100
-        ? percentageText.text(`at least ${this.value}%`)
-        : percentageText.text(`${this.value}%`);
-    });
+    setupCartogram({ us, broadband });
+    percentageSlider.on("input", updateCartogram);
+    summaryType.on("input", updateCartogram);
   });
 }
 

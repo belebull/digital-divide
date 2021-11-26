@@ -1,7 +1,7 @@
 <div class="chart-cartogram">
   <div class="cartogram-summary">
     There are
-    <span class="summary-count"> 400 </span>
+    <span id="summary-count"></span>
     counties in the U.S. where
     <span class="summary-percentage">
       <span id="percentage-text"></span>
@@ -10,18 +10,17 @@
           type="range"
           name="percentage-slider-input"
           id="percentage-slider-input"
-          min="10"
+          min="0"
           max="100"
-          step="10"
+          step="1"
         />
       </span>
     </span>
     of the county's population
-    <span class="summary-property">
-      <select name="property" id="property">
-        <option value="availability">has access to broadband</option>
-        <option value="usage">uses broadband</option>
-      </select>
-    </span>.
+    <select name="type" id="summary-type">
+      <option value="availability">has access to broadband</option>
+      <option value="usage">uses broadband</option>
+    </select>
+    <span>.</span>
   </div>
 </div>
