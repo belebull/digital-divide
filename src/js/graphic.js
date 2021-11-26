@@ -1,6 +1,10 @@
 /* global d3 */
-import * as topojson from 'topojson-client';
-import loadData from './load-data';
+import * as topojson from "topojson-client";
+import noUiSlider from "nouislider";
+import loadData from "./load-data";
+
+let percentageSlider;
+let percentageText;
 
 function resize() {}
 
@@ -25,7 +29,7 @@ function fixDiscrepancies(data) {
     const broadbandCounty = broadband[broadbandIdx];
 
     // get corresponding TopoJSON
-    const countyName = broadbandCounty.name.split(' ', 2)[0];
+    const countyName = broadbandCounty.name.split(" ", 2)[0];
     const topoIdx = counties.features.findIndex((county) =>
       county.properties.NAME.includes(countyName)
     );
@@ -73,21 +77,20 @@ SOURCES:
   - Karim Douieb's 2016 Election Map on Observable (https://observablehq.com/@karimdouieb/try-to-impeach-this-challenge-accepted)
   - County Boundaries by Ian Johnson on Observable (https://observablehq.com/@enjalot/county-boundaries)
 */
-
 function createCartogram(data) {
   const { us, counties } = data;
   // set dimensions of map container for projection
   const width =
-    document.getElementsByClassName('chart-cartogram')[0].offsetWidth;
+    document.getElementsByClassName("chart-cartogram")[0].offsetWidth;
   const aspectRatio = 5 / 8;
   const height = width * aspectRatio;
 
   // create map container
   const svg = d3
-    .select('.chart-cartogram')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height);
+    .select(".chart-cartogram")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
 
   // generate county features and projection
   const projection = d3
@@ -102,27 +105,27 @@ function createCartogram(data) {
 
   // append state and county boundary paths to the SVG container
   svg
-    .append('g')
-    .selectAll('path')
+    .append("g")
+    .selectAll("path")
     .data(counties)
     .enter()
-    .append('path')
-    .attr('fill', (county) => color(county.properties.availability))
-    .attr('d', path);
+    .append("path")
+    .attr("fill", (county) => color(county.properties.availability))
+    .attr("d", path);
 
   svg
-    .append('path')
+    .append("path")
     .datum(topojson.mesh(us, us.objects.counties), (a, b) => a !== b)
-    .attr('fill', 'none')
-    .attr('stroke', 'white')
-    .attr('stroke-linejoin', 'round')
-    .attr('stroke-width', 0.5)
-    .attr('d', path);
+    .attr("fill", "none")
+    .attr("stroke", "white")
+    .attr("stroke-linejoin", "round")
+    .attr("stroke-width", 0.5)
+    .attr("d", path);
 }
 
 function init() {
   // load necessary datasets
-  loadData(['usTopo.json', 'broadband.csv']).then((result) => {
+  loadData(["usTopo.json", "broadband.csv"]).then((result) => {
     const us = result[0];
     const broadband = result[1];
 
@@ -130,6 +133,21 @@ function init() {
     let counties = topojson.feature(us, us.objects.counties);
     counties = generateCountyData({ counties, broadband });
     createCartogram({ us, counties });
+
+    // add event listeners for cartogram
+    percentageSlider = d3.select("#percentage-slider-input");
+    percentageText = d3.select("#percentage-text");
+
+    // set inital value of the slider
+    percentageText.text(`at least ${percentageSlider.node().value}%`);
+
+    // change slider value on input
+    percentageSlider.on("input", function () {
+      // eslint-disable-next-line no-unused-expressions
+      this.value < 100
+        ? percentageText.text(`at least ${this.value}%`)
+        : percentageText.text(`${this.value}%`);
+    });
   });
 }
 

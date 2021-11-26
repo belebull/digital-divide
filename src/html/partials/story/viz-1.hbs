@@ -4,14 +4,21 @@
     <span class="summary-count"> 400 </span>
     counties in the U.S. where
     <span class="summary-percentage">
-      <span class="percentage-text">at least 70% </span>
+      <span id="percentage-text"></span>
       <span class="percentage-slider">
-        <input type="range" min="0" max="100" step="10" />
+        <input
+          type="range"
+          name="percentage-slider-input"
+          id="percentage-slider-input"
+          min="10"
+          max="100"
+          step="10"
+        />
       </span>
     </span>
     of the county's population
     <span class="summary-property">
-      <select name="property" id="propert">
+      <select name="property" id="property">
         <option value="availability">has access to broadband</option>
         <option value="usage">uses broadband</option>
       </select>
