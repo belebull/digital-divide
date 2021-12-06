@@ -23,52 +23,39 @@ function fixDiscrepancies(data) {
   // remove U.S. territories
   counties.features = counties.features.filter((county) => +county.id <= 57000);
 
-  // get county ids from bothe
+  // get county ids from both
   broadband.forEach((county) => broadbandIds.push(+county.id));
   counties.features.forEach((county) => topoIds.push(+county.id));
 
   // identify county ids not in TopoJSON counties
-  const missingInTopo = broadbandIds.filter((x) => topoIds.indexOf(x) === -1);
-  missingInTopo.forEach((countyId) => {
-    // get county information from broadban
-    const broadbandIdx = broadbandIds.indexOf(countyId);
-    const broadbandCounty = broadband[broadbandIdx];
-
-    // get corresponding TopoJSON
-    const countyName = broadbandCounty.name.split(" ", 2)[0];
-    const topoIdx = counties.features.findIndex((county) =>
-      county.properties.NAME.includes(countyName)
-    );
-    const topoCounty = counties.features[topoIdx];
-
-    // update TopoJSON
-    const topoCountyId =
-      String(countyId).length === 4 ? `0${String(countyId)}` : String(countyId);
-    topoCounty.id = topoCountyId;
-    topoCounty.properties.GEOID = topoCountyId;
-    counties.features[topoIdx] = topoCounty;
-  });
+  const noData = topoIds.filter((x) => broadbandIds.indexOf(x) === -1);
+  counties.features = counties.features.filter(
+    (county) => noData.indexOf(+county.id) === -1
+  );
 
   return { counties, broadband };
 }
 
 function generateCountyData(data) {
-  // clean county data
   const { counties, broadband } = fixDiscrepancies(data);
 
   // update county information
   const updatedCounties = counties.features.map((county) => {
-    const { abbr, id, name, availability, usage } = broadband.find(
+    const countyInfo = broadband.find(
       (broadbandCounty) => +broadbandCounty.id === +county.id
     );
+
+    if (countyInfo == null) {
+      console.log(county);
+    }
 
     return {
       ...county,
       properties: {
-        name,
-        state: abbr,
-        availability: +availability,
-        usage: +usage,
+        name: countyInfo.name,
+        state: countyInfo.state,
+        availability: +countyInfo.availability,
+        usage: +countyInfo.usage,
       },
     };
   });
