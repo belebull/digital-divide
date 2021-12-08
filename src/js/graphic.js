@@ -15,6 +15,7 @@ let type;
 
 function resize() {}
 
+/* FIRST VISULIZATION */
 function fixDiscrepancies(data) {
   const { counties, broadband } = data;
   const topoIds = [];
@@ -163,6 +164,8 @@ function updateCartogram() {
     .size()
     .toLocaleString("en-US");
 }
+
+/* SECOND VISUALIZATION */
 
 function init() {
   // load necessary datasets
