@@ -166,6 +166,42 @@ function updateCartogram() {
 }
 
 /* SECOND VISUALIZATION */
+function generateComparison(broadband) {
+  const parent = document.getElementsByClassName("comparison-plot")[0];
+  parent.style.width = `${window.screen.availWidth * (2 / 3)}px`;
+  parent.style.height = `${window.screen.availHeight * (2 / 3)}px`;
+
+  const svg = d3
+    .select(".comparison-plot")
+    .append("svg")
+    .attr("width", parent.clientWidth)
+    .attr("height", parent.clientHeight);
+
+  const x = d3
+    .scaleLinear()
+    .domain([0, 100])
+    .range([0, parent.clientWidth - 100]);
+  svg
+    .append("g")
+    .attr("transform", `translate(0, ${parent.clientHeight - 100})`)
+    .call(d3.axisBottom(x));
+  const y = d3
+    .scaleLinear()
+    .domain([0, 100])
+    .range([parent.clientHeight - 100, 0]);
+  svg.append("g").call(d3.axisLeft(y));
+
+  svg
+    .append("g")
+    .selectAll("dot")
+    .data(broadband)
+    .enter()
+    .append("circle")
+    .attr("cx", (d) => x(d.availability * 100))
+    .attr("cy", (d) => y(d.usage * 100))
+    .attr("r", 1.5)
+    .style("fill", "blue");
+}
 
 function init() {
   // load necessary datasets
@@ -174,6 +210,7 @@ function init() {
     const broadband = result[1];
 
     setupCartogram({ us, broadband });
+    generateComparison(broadband);
   });
 }
 
