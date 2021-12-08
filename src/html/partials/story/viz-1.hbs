@@ -1,26 +1,28 @@
-<div class="chart-cartogram">
-  <div class="cartogram-summary">
-    There are
-    <span id="summary-count"></span>
-    counties in the U.S. where
-    <span class="summary-percentage">
-      <span id="percentage-text"></span>
-      <span class="percentage-slider">
-        <input
-          type="range"
-          name="percentage-slider-input"
-          id="percentage-slider-input"
-          min="0"
-          max="100"
-          step="1"
-        />
+<div class="section">
+  <div class="chart-cartogram">
+    <div class="cartogram-summary">
+      There are
+      <span id="summary-count"></span>
+      counties in the U.S. where
+      <span class="summary-percentage">
+        <span id="percentage-text"></span>
+        <span class="percentage-slider">
+          <input
+            type="range"
+            name="percentage-slider-input"
+            id="percentage-slider-input"
+            min="0"
+            max="100"
+            step="1"
+          />
+        </span>
       </span>
-    </span>
-    of the county's population
-    <select name="type" id="summary-type">
-      <option value="availability">has access to broadband</option>
-      <option value="usage">uses broadband</option>
-    </select>
-    <span>.</span>
+      of the county's population
+      <select name="type" id="summary-type">
+        <option value="availability">has access to broadband</option>
+        <option value="usage">uses broadband</option>
+      </select>
+      <span>.</span>
+    </div>
   </div>
 </div>

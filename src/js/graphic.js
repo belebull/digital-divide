@@ -1,4 +1,5 @@
 /* global d3 */
+import { parse } from "handlebars";
 import * as topojson from "topojson-client";
 import loadData from "./load-data";
 
@@ -166,30 +167,56 @@ function updateCartogram() {
 }
 
 /* SECOND VISUALIZATION */
+
+/* SOURCES:
+- https://www.d3-graph-gallery.com/graph/scatter_basic.html
+- https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/
+- https://marcwie.github.io/blog/responsive-scatter-d3/
+*/
 function generateComparison(broadband) {
-  const parent = document.getElementsByClassName("comparison-plot")[0];
-  parent.style.width = `${window.screen.availWidth * (2 / 3)}px`;
-  parent.style.height = `${window.screen.availHeight * (2 / 3)}px`;
+  // create SVG and set dimensions
+  const svg = d3.select("div#comparison-plot").append("svg");
+  const container = svg.node().parentNode;
+  const margin = { vertical: 60, horizontal: 80 };
+  const axisOffset = 10;
+  const width = (container.clientWidth * 4) / 5;
+  const height = (width * 4) / 5 - margin.vertical; // accounts for the height of the sticky header
 
-  const svg = d3
-    .select(".comparison-plot")
-    .append("svg")
-    .attr("width", parent.clientWidth)
-    .attr("height", parent.clientHeight);
+  // make SVG responsive to window size changes
+  svg
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr(
+      "viewBox",
+      `0 0 ${width + 2 * margin.horizontal + axisOffset} ${
+        height + 2 * margin.vertical + axisOffset
+      }`
+    )
+    .classed("svg-content", true);
 
+  // create axex scales
   const x = d3
     .scaleLinear()
     .domain([0, 100])
-    .range([0, parent.clientWidth - 100]);
-  svg
-    .append("g")
-    .attr("transform", `translate(0, ${parent.clientHeight - 100})`)
-    .call(d3.axisBottom(x));
+    .range([margin.horizontal + axisOffset, width - margin.horizontal]);
+
   const y = d3
     .scaleLinear()
     .domain([0, 100])
-    .range([parent.clientHeight - 100, 0]);
-  svg.append("g").call(d3.axisLeft(y));
+    .range([height - margin.vertical - axisOffset, margin.vertical]);
+
+  // place scales correctly within container
+  svg
+    .append("g")
+    .attr(
+      "transform",
+      `translate(0, ${height - margin.horizontal + axisOffset})`
+    )
+    .call(d3.axisBottom(x));
+
+  svg
+    .append("g")
+    .attr("transform", `translate(${margin.vertical}, 0)`)
+    .call(d3.axisLeft(y));
 
   svg
     .append("g")
@@ -199,7 +226,7 @@ function generateComparison(broadband) {
     .append("circle")
     .attr("cx", (d) => x(d.availability * 100))
     .attr("cy", (d) => y(d.usage * 100))
-    .attr("r", 1.5)
+    .attr("r", 2)
     .style("fill", "blue");
 }
 
