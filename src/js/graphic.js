@@ -14,6 +14,10 @@ let summaryType;
 let threshold;
 let type;
 
+// elements for scatter plot
+let usage;
+let availability;
+
 function resize() {}
 
 /* FIRST VISULIZATION */
@@ -167,11 +171,43 @@ function updateCartogram() {
 }
 
 /* SECOND VISUALIZATION */
+// SOURCE: https://www.w3resource.com/javascript-exercises/fundamental/javascript-fundamental-exercise-88.php
+function calcMedian(arr) {
+  const mid = Math.floor(arr.length / 2);
+  const sorted = [...arr].sort((a, b) => a - b);
+  return sorted.length % 2 !== 0
+    ? sorted[mid]
+    : (sorted[mid - 1] + sorted[mid]) / 2;
+}
 
+function dragstarted() {
+  d3.select(this).classed("active-drag", true);
+}
+
+function dragged() {
+  const x = d3.event.dx;
+  const y = d3.event.dy;
+
+  const line = d3.select(this);
+
+  const attributes = {
+    x1: parseInt(line.attr("x1")) + x,
+    y1: parseInt(line.attr("y1")) + y,
+    x2: parseInt(line.attr("x2")) + x,
+    y2: parseInt(line.attr("y2")) + y,
+  };
+
+  line.attr(attributes);
+}
+
+function draggedend() {
+  d3.select(this).classed("active-drag", false);
+}
 /* SOURCES:
 - https://www.d3-graph-gallery.com/graph/scatter_basic.html
 - https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/
 - https://marcwie.github.io/blog/responsive-scatter-d3/
+- https://stackoverflow.com/questions/27026625/how-to-change-line-color-in-d3js-according-to-axis-value
 */
 function generateComparison(broadband) {
   // create SVG and set dimensions
@@ -228,6 +264,35 @@ function generateComparison(broadband) {
     .attr("cy", (d) => y(d.usage * 100))
     .attr("r", 2)
     .style("fill", "blue");
+
+  // calculate the median of the county metrics
+  availability = [];
+  usage = [];
+  broadband.forEach((county) => {
+    availability.push(+county.availability);
+    usage.push(+county.usage);
+  });
+
+  const availabilityMedian = calcMedian(availability);
+  const usageMedian = calcMedian(usage);
+
+  // add median lines to the scatter plot
+  svg
+    .append("line")
+    .attr("x1", x(availabilityMedian * 100))
+    .attr("x2", x(availabilityMedian * 100))
+    .attr("y1", y(0))
+    .attr("y2", y(100))
+    .attr("stroke", "green")
+    .attr("stroke-width", 2);
+  svg
+    .append("line")
+    .attr("x1", x(0))
+    .attr("x2", x(100))
+    .attr("y1", y(usageMedian * 100))
+    .attr("y2", y(usageMedian * 100))
+    .attr("stroke", "red")
+    .attr("stroke-width", 2);
 }
 
 function init() {
