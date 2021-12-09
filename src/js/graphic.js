@@ -4,6 +4,9 @@ import * as topojson from "topojson-client";
 import lookupStateName from "./utils/lookup-state-name.js";
 import loadData from "./load-data";
 
+// averages
+let averages;
+
 // elements for cartogram
 let countyPaths;
 
@@ -16,10 +19,20 @@ let threshold;
 let type;
 
 // elements for scatter plot
+let comparisonPoints;
+let usageLine;
+let availabilityLine;
 let usage;
 let availability;
-let states;
+let x;
+let y;
+
+let availabilityAvg;
+let usageAvg;
+
 let comparisonDropdown;
+let stateAbbrs;
+let stateNames;
 
 function resize() {}
 
@@ -72,7 +85,7 @@ function generateCountyData(data) {
   return updatedCounties;
 }
 
-function filterCounties(county, threshold, type) {
+function filterCartogramCounties(county, threshold, type) {
   return +county.properties[type] >= threshold
     ? "selected-county"
     : "unselected-county";
@@ -112,7 +125,7 @@ function generateCartogram(data) {
     .enter()
     .append("path")
     .attr("class", (county) =>
-      filterCounties(county, threshold / 100, "availability")
+      filterCartogramCounties(county, threshold / 100, "availability")
     )
     .attr("d", path);
 
@@ -166,7 +179,9 @@ function updateCartogram() {
 
   // get type and filter counties
   type = summaryType.node().value;
-  countyPaths.attr("class", (d) => filterCounties(d, threshold / 100, type));
+  countyPaths.attr("class", (d) =>
+    filterCartogramCounties(d, threshold / 100, type)
+  );
   summaryCount.textContent = d3
     .selectAll(".selected-county")
     .size()
@@ -174,20 +189,14 @@ function updateCartogram() {
 }
 
 /* SECOND VISUALIZATION */
-// SOURCE: https://www.w3resource.com/javascript-exercises/fundamental/javascript-fundamental-exercise-88.php
-function calcMedian(arr) {
-  const mid = Math.floor(arr.length / 2);
-  const sorted = [...arr].sort((a, b) => a - b);
-  return sorted.length % 2 !== 0
-    ? sorted[mid]
-    : (sorted[mid - 1] + sorted[mid]) / 2;
-}
 
 // SOURCE: https://stackoverflow.com/questions/15125920/how-to-get-distinct-values-from-an-array-of-objects-in-javascript
 function populateStates(broadband) {
-  const statesAbbr = [...new Set(broadband.map((county) => county.state))];
-  states = statesAbbr.map((state) => lookupStateName(state));
+  stateAbbrs = [...new Set(broadband.map((county) => county.state))];
+  stateNames = [];
+  stateAbbrs.forEach((state) => stateNames.push(lookupStateName(state)));
 }
+
 /* SOURCES:
 - https://www.d3-graph-gallery.com/graph/scatter_basic.html
 - https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/
@@ -198,10 +207,10 @@ function generateComparison(broadband) {
   // create SVG and set dimensions
   const svg = d3.select("div#comparison-plot").append("svg");
   const container = svg.node().parentNode;
-  const margin = { vertical: 60, horizontal: 80 };
-  const axisOffset = 10;
-  const width = (container.clientWidth * 4) / 5;
-  const height = (width * 4) / 5 - margin.vertical; // accounts for the height of the sticky header
+  const margin = { vertical: 25, horizontal: 45 };
+  const axisOffset = 15;
+  const width = (container.clientWidth * 2) / 3 - margin.horizontal;
+  const height = (width * 2) / 3 - margin.vertical; // accounts for the height of the sticky header
 
   // make SVG responsive to window size changes
   svg
@@ -214,16 +223,18 @@ function generateComparison(broadband) {
     )
     .classed("svg-content", true);
 
-  // create axex scales
-  const x = d3
+  // create axes scales
+  x = d3
     .scaleLinear()
     .domain([0, 100])
     .range([margin.horizontal + axisOffset, width - margin.horizontal]);
 
-  const y = d3
+  y = d3
     .scaleLinear()
     .domain([0, 100])
     .range([height - margin.vertical - axisOffset, margin.vertical]);
+
+  const z = d3.scaleLinear().domain([74, 10105722]).range([1.5, 30]);
 
   // place scales correctly within container
   svg
@@ -239,7 +250,7 @@ function generateComparison(broadband) {
     .attr("transform", `translate(${margin.vertical}, 0)`)
     .call(d3.axisLeft(y));
 
-  svg
+  comparisonPoints = svg
     .append("g")
     .selectAll("dot")
     .data(broadband)
@@ -247,10 +258,64 @@ function generateComparison(broadband) {
     .append("circle")
     .attr("cx", (d) => x(d.availability * 100))
     .attr("cy", (d) => y(d.usage * 100))
-    .attr("r", 2)
-    .style("fill", "blue");
+    .attr("r", (d) => z(d.total))
+    .attr("class", "comparison-selected");
 
-  // calculate the median of the county metrics
+  // add median lines to the scatter plot
+  availabilityLine = svg
+    .append("line")
+    .attr("x1", x(availabilityAvg * 100))
+    .attr("x2", x(availabilityAvg * 100))
+    .attr("y1", y(0))
+    .attr("y2", y(100))
+    .attr("stroke", "#750175")
+    .attr("stroke-width", 2)
+    .attr("stroke-dasharray", 5)
+    .attr("opacity", 0.5);
+
+  usageLine = svg
+    .append("line")
+    .attr("x1", x(0))
+    .attr("x2", x(100))
+    .attr("y1", y(usageAvg * 100))
+    .attr("y2", y(usageAvg * 100))
+    .attr("stroke", "#ea519d")
+    .attr("stroke-width", 2)
+    .attr("stroke-dasharray", 3);
+}
+
+function updateComparison() {
+  const selectedState = comparisonDropdown.node().value;
+  comparisonPoints.attr("class", (d) =>
+    d.state === selectedState || selectedState === "US"
+      ? "comparison-selected"
+      : "comparison-unselected"
+  );
+
+  const selectedStateInfo =
+    comparisonDropdown.node().options[comparisonDropdown.node().selectedIndex];
+  const selectedStateAvailAvg = selectedStateInfo.availabilityAvg.toFixed(2);
+  const selectedStateUsageAvg = selectedStateInfo.usageAvg.toFixed(2);
+
+  availabilityLine
+    .transition()
+    .duration(2000)
+    .delay(1000)
+    .attr("x1", x(selectedStateAvailAvg * 100))
+    .attr("x2", x(selectedStateAvailAvg * 100));
+
+  usageLine
+    .transition()
+    .duration(2000)
+    .delay(2250)
+    .attr("y1", y(selectedStateUsageAvg * 100))
+    .attr("y2", y(selectedStateUsageAvg * 100));
+}
+
+// SOURCE: https://stackoverflow.com/questions/8674618/adding-options-to-select-with-javascript
+function setupComparison(data) {
+  const { broadband, averages } = data;
+  // calculate the average of the county metrics
   availability = [];
   usage = [];
   broadband.forEach((county) => {
@@ -258,54 +323,51 @@ function generateComparison(broadband) {
     usage.push(+county.usage);
   });
 
-  const availabilityMedian = calcMedian(availability);
-  const usageMedian = calcMedian(usage);
+  availabilityAvg =
+    availability.reduce((a, b) => a + b, 0) / availability.length;
+  usageAvg = usage.reduce((a, b) => a + b, 0) / usage.length;
 
-  // add median lines to the scatter plot
-  svg
-    .append("line")
-    .attr("x1", x(availabilityMedian * 100))
-    .attr("x2", x(availabilityMedian * 100))
-    .attr("y1", y(0))
-    .attr("y2", y(100))
-    .attr("stroke", "green")
-    .attr("stroke-width", 2);
-  svg
-    .append("line")
-    .attr("x1", x(0))
-    .attr("x2", x(100))
-    .attr("y1", y(usageMedian * 100))
-    .attr("y2", y(usageMedian * 100))
-    .attr("stroke", "red")
-    .attr("stroke-width", 2);
+  // visualization elements
+  comparisonDropdown = d3.select("#comparison-state");
 
-  // SOURCE: https://stackoverflow.com/questions/8674618/adding-options-to-select-with-javascript
-  const stateSelection = document.getElementById("comparison-state");
-
-  // add a full option
+  // dynamically add states to dropdown
+  populateStates(broadband);
   const usOpt = document.createElement("option");
-  usOpt.value = "us";
+  usOpt.value = "US";
   usOpt.innerHTML = "the United States";
-  stateSelection.appendChild(usOpt);
+  usOpt.availabilityAvg = availabilityAvg;
+  usOpt.usageAvg = usageAvg;
+  comparisonDropdown.node().appendChild(usOpt);
 
   // add options for each state
-  states.forEach((state, index) => {
+  stateNames.forEach((state, index) => {
     const stateOpt = document.createElement("option");
-    stateOpt.value = index;
+    stateOpt.value = stateAbbrs[index];
     stateOpt.innerHTML = state;
-    stateSelection.appendChild(stateOpt);
+    const stateInfo = averages.filter(
+      (stateAbbr) => stateAbbr.state === stateAbbrs[index]
+    )[0];
+    stateOpt.availabilityAvg = +stateInfo.availability;
+    stateOpt.usageAvg = +stateInfo.usage;
+    comparisonDropdown.node().appendChild(stateOpt);
   });
+
+  // generate the visualization
+  generateComparison(broadband);
+
+  // add event listeners
+  comparisonDropdown.on("input", updateComparison);
 }
 
 function init() {
   // load necessary datasets
-  loadData(["usTopo.json", "broadband.csv"]).then((result) => {
+  loadData(["usTopo.json", "broadband.csv", "averages.csv"]).then((result) => {
     const us = result[0];
     const broadband = result[1];
+    const averages = result[2];
 
     setupCartogram({ us, broadband });
-    populateStates(broadband);
-    generateComparison(broadband);
+    setupComparison({ broadband, averages });
   });
 }
 
