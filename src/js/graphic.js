@@ -1,6 +1,7 @@
 /* global d3 */
 import { parse } from "handlebars";
 import * as topojson from "topojson-client";
+import lookupStateName from "./utils/lookup-state-name.js";
 import loadData from "./load-data";
 
 // elements for cartogram
@@ -17,6 +18,8 @@ let type;
 // elements for scatter plot
 let usage;
 let availability;
+let states;
+let comparisonDropdown;
 
 function resize() {}
 
@@ -180,28 +183,10 @@ function calcMedian(arr) {
     : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-function dragstarted() {
-  d3.select(this).classed("active-drag", true);
-}
-
-function dragged() {
-  const x = d3.event.dx;
-  const y = d3.event.dy;
-
-  const line = d3.select(this);
-
-  const attributes = {
-    x1: parseInt(line.attr("x1")) + x,
-    y1: parseInt(line.attr("y1")) + y,
-    x2: parseInt(line.attr("x2")) + x,
-    y2: parseInt(line.attr("y2")) + y,
-  };
-
-  line.attr(attributes);
-}
-
-function draggedend() {
-  d3.select(this).classed("active-drag", false);
+// SOURCE: https://stackoverflow.com/questions/15125920/how-to-get-distinct-values-from-an-array-of-objects-in-javascript
+function populateStates(broadband) {
+  const statesAbbr = [...new Set(broadband.map((county) => county.state))];
+  states = statesAbbr.map((state) => lookupStateName(state));
 }
 /* SOURCES:
 - https://www.d3-graph-gallery.com/graph/scatter_basic.html
@@ -293,6 +278,23 @@ function generateComparison(broadband) {
     .attr("y2", y(usageMedian * 100))
     .attr("stroke", "red")
     .attr("stroke-width", 2);
+
+  // SOURCE: https://stackoverflow.com/questions/8674618/adding-options-to-select-with-javascript
+  const stateSelection = document.getElementById("comparison-state");
+
+  // add a full option
+  const usOpt = document.createElement("option");
+  usOpt.value = "us";
+  usOpt.innerHTML = "the United States";
+  stateSelection.appendChild(usOpt);
+
+  // add options for each state
+  states.forEach((state, index) => {
+    const stateOpt = document.createElement("option");
+    stateOpt.value = index;
+    stateOpt.innerHTML = state;
+    stateSelection.appendChild(stateOpt);
+  });
 }
 
 function init() {
@@ -302,6 +304,7 @@ function init() {
     const broadband = result[1];
 
     setupCartogram({ us, broadband });
+    populateStates(broadband);
     generateComparison(broadband);
   });
 }
