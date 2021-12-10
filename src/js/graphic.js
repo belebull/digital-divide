@@ -33,6 +33,17 @@ let comparisonDropdown;
 let availabilityPercentage;
 let usagePercentage;
 
+// elements for bar chart
+let intersectionX;
+let intersectionY;
+
+let typeBtns;
+let classBtns;
+let metricBtns;
+let intersectionType;
+let intersectionClass;
+let intersectionMetric;
+
 function resize() {}
 
 /* FIRST VISULIZATION */
@@ -422,6 +433,11 @@ function setupComparison(data) {
 
 /* THIRD VISUALIZATION */
 
+/* SOURCES:
+- https://jsfiddle.net/ysr5aohw/
+- https://www.d3-graph-gallery.com/graph/barplot_button_data_hard.html
+- https://www.d3-graph-gallery.com/graph/barplot_horizontal.html
+*/
 function generateIntersection(broadband) {
   const container = d3.select("#intersection").node();
   const margin = { top: 20, bottom: 20, right: 0, left: 60 };
@@ -441,7 +457,25 @@ function generateIntersection(broadband) {
     )
     .classed("svg-content", true)
     .append("g")
-    .attr("transform", `translate (${margin.left}, ${margin.top})`);
+    .attr("transform", `translate (${margin.left}, ${margin.top})`)
+    .attr("id", "intersection-plotSVG");
+
+  // create axes functions
+  intersectionX = d3.scaleLinear().range([0, width]);
+
+  intersectionY = d3.scaleBand().range([0, height]).padding(0.2);
+
+  svg
+    .append("g")
+    .attr("id", "intersection-x")
+    .attr("transform", `translate(${margin.left}, ${height})`)
+    .call(d3.axisBottom(intersectionX).tickFormat(d3.format(".0%")))
+    .selectAll("text");
+  svg
+    .append("g")
+    .attr("id", "intersection-y")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(d3.axisLeft(intersectionY));
 
   // initialize data
   const data = generateIntersectionData(
@@ -451,43 +485,24 @@ function generateIntersection(broadband) {
     "low"
   );
 
-  // get domain for availability
-  const domain = [];
-  data.filter((county) => domain.push(+county.availability));
+  updateIntersection(data);
 
-  // create axes functions
-  const intersectionX = d3
-    .scaleLinear()
-    .domain([d3.min(domain), d3.max(domain)])
-    .range([0, width]);
-  const intersectionY = d3
-    .scaleBand()
-    .range([0, height])
-    .domain(data.map((d) => `${d.name}, ${d.state}`))
-    .padding(0.2);
+  // // get domain for availability
+  // const domain = [];
+  // data.forEach((county) => domain.push(+county.availability));
 
   // add axes to SVGs
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin.left}, ${height})`)
-    .call(d3.axisBottom(intersectionX))
-    .selectAll("text");
-  svg
-    .append("g")
-    .attr("transform", `translate(${margin.left}, 0)`)
-    .call(d3.axisLeft(intersectionY));
 
-  const bars = svg
-    .selectAll("rect")
-    .data(data)
-    .join("rect")
-    .attr("x", intersectionX(0) + margin.left)
-    .attr("y", (d) => intersectionY(`${d.name}, ${d.state}`))
-    .attr("width", (d) => intersectionX(d.availability))
-    .attr("height", (d) => intersectionY.bandwidth())
-    .attr("fill", "blue");
-
-  console.log(data);
+  // const bars = svg
+  //   .selectAll("rect")
+  //   .data(data)
+  //   .join("rect")
+  //   .attr("x", intersectionX(0) + margin.left)
+  //   .attr("y", (d) => intersectionY(`${d.name}, ${d.state}`))
+  //   .attr("width", (d) => intersectionX(d.availability))
+  //   .attr("height", (d) => intersectionY.bandwidth())
+  //   .attr("fill", "blue")
+  //   .attr("class", "bars");
 }
 
 // SOURCE: https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value?page=1&tab=votes#tab-top
@@ -499,6 +514,104 @@ function generateIntersectionData(broadband, metric, type, income) {
   return counties.slice(0, 10);
 }
 
+function setupIntersection(broadband) {
+  // get buttons for graph
+  typeBtns = d3.selectAll("#type .button");
+  classBtns = d3.selectAll("#class .button");
+  metricBtns = d3.selectAll("#metric .button");
+  let newData;
+
+  // set initial values
+  intersectionType = "metro";
+  intersectionClass = "low";
+  intersectionMetric = "availability";
+
+  typeBtns.on("click", function () {
+    d3.select("#type .current").classed("current", false);
+    d3.select(this).classed("current", true);
+    intersectionType = d3.select(this).attr("data-val");
+    newData = generateIntersectionData(
+      broadband,
+      intersectionMetric,
+      intersectionType,
+      intersectionClass
+    );
+    updateIntersection(newData);
+  });
+  classBtns.on("click", function () {
+    d3.select("#class .current").classed("current", false);
+    d3.select(this).classed("current", true);
+    intersectionClass = d3.select(this).attr("data-val");
+    newData = generateIntersectionData(
+      broadband,
+      intersectionMetric,
+      intersectionType,
+      intersectionClass
+    );
+    updateIntersection(newData);
+  });
+  metricBtns.on("click", function () {
+    d3.select("#metric .current").classed("current", false);
+    d3.select(this).classed("current", true);
+    intersectionMetric = d3.select(this).attr("data-val");
+    newData = generateIntersectionData(
+      broadband,
+      intersectionMetric,
+      intersectionType,
+      intersectionClass
+    );
+    updateIntersection(newData);
+  });
+
+  generateIntersection(broadband);
+}
+
+/* SOURCES:
+- https://jsfiddle.net/ysr5aohw/
+- https://www.d3-graph-gallery.com/graph/barplot_button_data_hard.html
+- https://www.d3-graph-gallery.com/graph/barplot_button_data_simple.html
+- https://www.d3-graph-gallery.com/graph/barplot_horizontal.html
+- https://flowingdata.com/projects/2018/dating-pool/
+- https://stackoverflow.com/questions/65065161/dynamically-update-styling-on-button-click-d3-bar-chart
+- http://bl.ocks.org/phoebebright/3098488
+*/
+
+function updateIntersection(data) {
+  const svg = d3.select("#intersection-plotSVG");
+
+  const domain = [];
+  data.forEach((county) => domain.push(+county[intersectionMetric]));
+
+  intersectionX.domain([d3.min(domain), d3.max(domain)]);
+  intersectionY.domain(data.map((d) => `${d.name}, ${d.state}`));
+
+  svg
+    .select("#intersection-x")
+    .transition()
+    .duration(1000)
+    .call(d3.axisBottom(intersectionX));
+  svg
+    .select("#intersection-y")
+    .transition()
+    .duration(1000)
+    .call(d3.axisLeft(intersectionY));
+
+  const bars = svg.selectAll(".bars").data(data);
+
+  bars
+    .enter()
+    .append("rect")
+    .merge(bars)
+    .attr("class", "bars")
+    .attr("x", intersectionX(0) + 60)
+    .attr("y", (d) => intersectionY(`${d.name}, ${d.state}`))
+    .attr("width", (d) => intersectionX(d[intersectionMetric]))
+    .attr("height", (d) => intersectionY.bandwidth())
+    .attr("fill", (d) => (d.white_type === "over" ? "grey" : "green"));
+
+  bars.exit().remove();
+}
+
 function init() {
   // load necessary datasets
   loadData(["usTopo.json", "broadband.csv", "averages.csv"]).then((result) => {
@@ -508,7 +621,7 @@ function init() {
 
     setupCartogram({ us, broadband });
     setupComparison({ broadband, averages });
-    generateIntersection(broadband);
+    setupIntersection(broadband);
   });
 }
 

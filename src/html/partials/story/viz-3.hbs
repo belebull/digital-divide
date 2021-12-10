@@ -8,18 +8,21 @@
       <span>Availability</span>
     </div>
     <div class="controls">
-      <div class="location-input">
-        <button>Metro</button>
-        <button>Micro</button>
-        <button>Neither</button>
+      <div id="type">
+        <button class="button current" data-val="metro">Metro</button>
+        <button class="button" data-val="micro">Micro</button>
+        <button class="button" data-val="neither">Neither</button>
       </div>
-      <div class="class-input">
-        <button>Low</button>
-        <button>High</button>
+      <div id="class">
+        <button class="button current" data-val="low">Low</button>
+        <button class="button" data-val="high">High</button>
       </div>
-      <div>
-        <button>Availability</button>
-        <button>Usage</button>
+      <div id="metric">
+        <button
+          class="button current"
+          data-val="availability"
+        >Availability</button>
+        <button class="button" data-val="usage">Usage</button>
       </div>
     </div>
     <div id="intersection-table"></div>
