@@ -4,9 +4,6 @@ import * as topojson from "topojson-client";
 import lookupStateName from "./utils/lookup-state-name.js";
 import loadData from "./load-data";
 
-// averages
-let averages;
-
 // elements for cartogram
 let countyPaths;
 
@@ -29,10 +26,12 @@ let y;
 
 let availabilityAvg;
 let usageAvg;
-
-let comparisonDropdown;
 let stateAbbrs;
 let stateNames;
+
+let comparisonDropdown;
+let availabilityPercentage;
+let usagePercentage;
 
 function resize() {}
 
@@ -202,23 +201,31 @@ function populateStates(broadband) {
 - https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/
 - https://marcwie.github.io/blog/responsive-scatter-d3/
 - https://stackoverflow.com/questions/27026625/how-to-change-line-color-in-d3js-according-to-axis-value
+- https://www.d3-graph-gallery.com/graph/bubble_tooltip.html
+- https://www.d3-graph-gallery.com/graph/custom_axis.html#axistitles
 */
 function generateComparison(broadband) {
   // create SVG and set dimensions
   const svg = d3.select("div#comparison-plot").append("svg");
   const container = svg.node().parentNode;
-  const margin = { vertical: 25, horizontal: 45 };
-  const axisOffset = 15;
-  const width = (container.clientWidth * 2) / 3 - margin.horizontal;
-  const height = (width * 2) / 3 - margin.vertical; // accounts for the height of the sticky header
+  const margin = {
+    top: 30,
+    bottom: 10,
+    right: container.clientWidth / 6,
+    left: container.clientWidth / 6,
+  };
+  const axisOffset = 10;
+  const labelOffset = 30;
+  const width = (container.clientWidth * 2) / 3;
+  const height = (width * 2) / 3; // accounts for the height of the sticky header
 
   // make SVG responsive to window size changes
   svg
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr(
       "viewBox",
-      `0 0 ${width + 2 * margin.horizontal + axisOffset} ${
-        height + 2 * margin.vertical + axisOffset
+      `0 0 ${width + margin.left + margin.right + axisOffset + labelOffset} ${
+        height + margin.top + margin.bottom + labelOffset
       }`
     )
     .classed("svg-content", true);
@@ -226,29 +233,44 @@ function generateComparison(broadband) {
   // create axes scales
   x = d3
     .scaleLinear()
-    .domain([0, 100])
-    .range([margin.horizontal + axisOffset, width - margin.horizontal]);
+    .domain([0, 1])
+    .range([margin.left + axisOffset, width]);
 
   y = d3
     .scaleLinear()
-    .domain([0, 100])
-    .range([height - margin.vertical - axisOffset, margin.vertical]);
+    .domain([0, 1])
+    .range([height, margin.top - axisOffset]);
 
   const z = d3.scaleLinear().domain([74, 10105722]).range([1.5, 30]);
 
   // place scales correctly within container
   svg
     .append("g")
-    .attr(
-      "transform",
-      `translate(0, ${height - margin.horizontal + axisOffset})`
-    )
-    .call(d3.axisBottom(x));
+    .attr("transform", `translate(0, ${height - margin.bottom + axisOffset})`)
+    .call(d3.axisBottom(x).tickSize(5).tickFormat(d3.format(".0%")));
 
   svg
     .append("g")
-    .attr("transform", `translate(${margin.vertical}, 0)`)
-    .call(d3.axisLeft(y));
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(d3.axisLeft(y).tickSize(5).tickFormat(d3.format(".0%")));
+
+  // add axes labels
+  svg
+    .append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height + axisOffset + 35)
+    .style("font-size", "14px")
+    .text("Availability (% of population)");
+
+  svg
+    .append("text")
+    .attr("text-anchor", "end")
+    .attr("x", -labelOffset)
+    .attr("y", margin.left - labelOffset - axisOffset * 2)
+    .attr("transform", "rotate(-90)")
+    .style("font-size", "14px")
+    .text("Usage (% of population)");
 
   comparisonPoints = svg
     .append("g")
@@ -256,18 +278,18 @@ function generateComparison(broadband) {
     .data(broadband)
     .enter()
     .append("circle")
-    .attr("cx", (d) => x(d.availability * 100))
-    .attr("cy", (d) => y(d.usage * 100))
+    .attr("cx", (d) => x(d.availability))
+    .attr("cy", (d) => y(d.usage))
     .attr("r", (d) => z(d.total))
     .attr("class", "comparison-selected");
 
   // add median lines to the scatter plot
   availabilityLine = svg
     .append("line")
-    .attr("x1", x(availabilityAvg * 100))
-    .attr("x2", x(availabilityAvg * 100))
+    .attr("x1", x(availabilityAvg))
+    .attr("x2", x(availabilityAvg))
     .attr("y1", y(0))
-    .attr("y2", y(100))
+    .attr("y2", y(1))
     .attr("stroke", "#750175")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", 5)
@@ -276,16 +298,18 @@ function generateComparison(broadband) {
   usageLine = svg
     .append("line")
     .attr("x1", x(0))
-    .attr("x2", x(100))
-    .attr("y1", y(usageAvg * 100))
-    .attr("y2", y(usageAvg * 100))
+    .attr("x2", x(1))
+    .attr("y1", y(usageAvg))
+    .attr("y2", y(usageAvg))
     .attr("stroke", "#ea519d")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", 3);
 }
 
+// SOURCE: https://www.tutorialsteacher.com/d3js/animation-with-d3js
 function updateComparison() {
   const selectedState = comparisonDropdown.node().value;
+
   comparisonPoints.attr("class", (d) =>
     d.state === selectedState || selectedState === "US"
       ? "comparison-selected"
@@ -294,22 +318,29 @@ function updateComparison() {
 
   const selectedStateInfo =
     comparisonDropdown.node().options[comparisonDropdown.node().selectedIndex];
-  const selectedStateAvailAvg = selectedStateInfo.availabilityAvg.toFixed(2);
-  const selectedStateUsageAvg = selectedStateInfo.usageAvg.toFixed(2);
+  const selectedStateAvailAvg = selectedStateInfo.availabilityAvg;
+  const selectedStateUsageAvg = selectedStateInfo.usageAvg;
 
   availabilityLine
     .transition()
-    .duration(2000)
-    .delay(1000)
-    .attr("x1", x(selectedStateAvailAvg * 100))
-    .attr("x2", x(selectedStateAvailAvg * 100));
+    .duration(1000)
+    .delay(500)
+    .attr("x1", x(selectedStateAvailAvg))
+    .attr("x2", x(selectedStateAvailAvg));
 
   usageLine
     .transition()
-    .duration(2000)
-    .delay(2250)
-    .attr("y1", y(selectedStateUsageAvg * 100))
-    .attr("y2", y(selectedStateUsageAvg * 100));
+    .duration(1000)
+    .delay(1750)
+    .attr("y1", y(selectedStateUsageAvg))
+    .attr("y2", y(selectedStateUsageAvg));
+
+  availabilityPercentage.node().innerHTML = `${Math.round(
+    selectedStateAvailAvg * 100
+  )}%`;
+  usagePercentage.node().innerHTML = `${Math.round(
+    selectedStateUsageAvg * 100
+  )}%`;
 }
 
 // SOURCE: https://stackoverflow.com/questions/8674618/adding-options-to-select-with-javascript
@@ -329,6 +360,14 @@ function setupComparison(data) {
 
   // visualization elements
   comparisonDropdown = d3.select("#comparison-state");
+  availabilityPercentage = d3.select("#comparison-availability");
+  usagePercentage = d3.select("#comparison-usage");
+
+  // set text in summary
+  availabilityPercentage.node().innerHTML = `${Math.round(
+    availabilityAvg * 100
+  )}%`;
+  usagePercentage.node().innerHTML = `${Math.round(usageAvg * 100)}%`;
 
   // dynamically add states to dropdown
   populateStates(broadband);
