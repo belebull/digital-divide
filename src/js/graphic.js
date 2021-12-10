@@ -508,10 +508,14 @@ function generateIntersection(broadband) {
 // SOURCE: https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value?page=1&tab=votes#tab-top
 function generateIntersectionData(broadband, metric, type, income) {
   const counties = broadband.filter(
-    (county) => county.type === type && county.class == income
+    (county) =>
+      county.type === type &&
+      county.class === income &&
+      county.availability !== "" &&
+      county.usage !== ""
   );
   counties.sort((a, b) => a[metric] > b[metric]);
-  return counties.slice(0, 10);
+  return counties.slice(0, 15);
 }
 
 function setupIntersection(broadband) {
@@ -582,7 +586,7 @@ function updateIntersection(data) {
   const domain = [];
   data.forEach((county) => domain.push(+county[intersectionMetric]));
 
-  intersectionX.domain([d3.min(domain), d3.max(domain)]);
+  intersectionX.domain([0, d3.max(domain)]);
   intersectionY.domain(data.map((d) => `${d.name}, ${d.state}`));
 
   svg
