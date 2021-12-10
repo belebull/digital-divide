@@ -230,9 +230,8 @@ function generateComparison(broadband) {
   };
 
   const moveTooltip = function (event, d) {
-    tooltip
-      .style("left", `${event.screenX - 5}px`)
-      .style("top", `${event.screenY - 5}px`);
+    const [x, y] = d3.pointer(event);
+    tooltip.attr("transform", `translate(${x}, ${y})`);
   };
 
   const hideTooltip = function (event, d) {
@@ -420,6 +419,8 @@ function setupComparison(data) {
   // add event listeners
   comparisonDropdown.on("input", updateComparison);
 }
+
+/* THIRD VISUALIZATION */
 
 function init() {
   // load necessary datasets
