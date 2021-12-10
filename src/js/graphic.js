@@ -219,6 +219,26 @@ function generateComparison(broadband) {
   const width = (container.clientWidth * 2) / 3;
   const height = (width * 2) / 3; // accounts for the height of the sticky header
 
+  const tooltip = d3
+    .select("div#comparison-plot")
+    .append("div")
+    .style("visbility", "hidden")
+    .attr("class", "tooltip");
+
+  const showTooltip = function (event, d) {
+    tooltip.style("visibility", "visible").html(d.name);
+  };
+
+  const moveTooltip = function (event, d) {
+    tooltip
+      .style("left", `${event.screenX - 5}px`)
+      .style("top", `${event.screenY - 5}px`);
+  };
+
+  const hideTooltip = function (event, d) {
+    tooltip.style("visibility", "hidden");
+  };
+
   // make SVG responsive to window size changes
   svg
     .attr("preserveAspectRatio", "xMinYMin meet")
@@ -281,7 +301,10 @@ function generateComparison(broadband) {
     .attr("cx", (d) => x(d.availability))
     .attr("cy", (d) => y(d.usage))
     .attr("r", (d) => z(d.total))
-    .attr("class", "comparison-selected");
+    .attr("class", "comparison-selected")
+    .on("mouseover", showTooltip)
+    .on("mousemove", moveTooltip)
+    .on("mouseout", hideTooltip);
 
   // add median lines to the scatter plot
   availabilityLine = svg
