@@ -422,6 +422,83 @@ function setupComparison(data) {
 
 /* THIRD VISUALIZATION */
 
+function generateIntersection(broadband) {
+  const container = d3.select("#intersection").node();
+  const margin = { top: 20, bottom: 20, right: 0, left: 60 };
+  const width = window.innerWidth - margin.left - margin.right;
+  const height = 10 * 100 - margin.top - margin.bottom;
+
+  // append SVG
+  const svg = d3
+    .select("#intersection-plot")
+    .append("svg")
+    .attr("perserveAspectRatio", "xMinYMin meet")
+    .attr(
+      "viewBox",
+      `0 0 ${width + margin.left + margin.right} ${
+        height + margin.top + margin.bottom
+      }`
+    )
+    .classed("svg-content", true)
+    .append("g")
+    .attr("transform", `translate (${margin.left}, ${margin.top})`);
+
+  // initialize data
+  const data = generateIntersectionData(
+    broadband,
+    "availability",
+    "metro",
+    "low"
+  );
+
+  // get domain for availability
+  const domain = [];
+  data.filter((county) => domain.push(+county.availability));
+
+  // create axes functions
+  const intersectionX = d3
+    .scaleLinear()
+    .domain([d3.min(domain), d3.max(domain)])
+    .range([0, width]);
+  const intersectionY = d3
+    .scaleBand()
+    .range([0, height])
+    .domain(data.map((d) => `${d.name}, ${d.state}`))
+    .padding(0.2);
+
+  // add axes to SVGs
+  svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${height})`)
+    .call(d3.axisBottom(intersectionX))
+    .selectAll("text");
+  svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .call(d3.axisLeft(intersectionY));
+
+  const bars = svg
+    .selectAll("rect")
+    .data(data)
+    .join("rect")
+    .attr("x", intersectionX(0) + margin.left)
+    .attr("y", (d) => intersectionY(`${d.name}, ${d.state}`))
+    .attr("width", (d) => intersectionX(d.availability))
+    .attr("height", (d) => intersectionY.bandwidth())
+    .attr("fill", "blue");
+
+  console.log(data);
+}
+
+// SOURCE: https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value?page=1&tab=votes#tab-top
+function generateIntersectionData(broadband, metric, type, income) {
+  const counties = broadband.filter(
+    (county) => county.type === type && county.class == income
+  );
+  counties.sort((a, b) => a[metric] > b[metric]);
+  return counties.slice(0, 10);
+}
+
 function init() {
   // load necessary datasets
   loadData(["usTopo.json", "broadband.csv", "averages.csv"]).then((result) => {
@@ -431,6 +508,7 @@ function init() {
 
     setupCartogram({ us, broadband });
     setupComparison({ broadband, averages });
+    generateIntersection(broadband);
   });
 }
 
