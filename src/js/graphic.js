@@ -1,6 +1,7 @@
 /* global d3 */
 import { parse } from "handlebars";
 import * as topojson from "topojson-client";
+import _ from "lodash";
 import lookupStateName from "./utils/lookup-state-name.js";
 import loadData from "./load-data";
 
@@ -441,8 +442,8 @@ function setupComparison(data) {
 function generateIntersection(broadband) {
   const container = d3.select("#intersection").node();
   const margin = { top: 20, bottom: 20, right: 0, left: 60 };
-  const width = window.innerWidth - margin.left - margin.right;
-  const height = 10 * 100 - margin.top - margin.bottom;
+  const width = window.innerWidth / 4 - margin.left - margin.right;
+  const height = 10 * 40 - margin.top - margin.bottom;
 
   // append SVG
   const svg = d3
@@ -578,15 +579,17 @@ function setupIntersection(broadband) {
 - https://flowingdata.com/projects/2018/dating-pool/
 - https://stackoverflow.com/questions/65065161/dynamically-update-styling-on-button-click-d3-bar-chart
 - http://bl.ocks.org/phoebebright/3098488
+- https://www.cloudhadoop.com/2020/02/different-ways-of-remove-property-in.html
 */
 
 function updateIntersection(data) {
+  // update the chart
   const svg = d3.select("#intersection-plotSVG");
 
   const domain = [];
   data.forEach((county) => domain.push(+county[intersectionMetric]));
 
-  intersectionX.domain([0, d3.max(domain)]);
+  intersectionX.domain([0, d3.max(domain)]).ticks(4);
   intersectionY.domain(data.map((d) => `${d.name}, ${d.state}`));
 
   svg
@@ -611,9 +614,74 @@ function updateIntersection(data) {
     .attr("y", (d) => intersectionY(`${d.name}, ${d.state}`))
     .attr("width", (d) => intersectionX(d[intersectionMetric]))
     .attr("height", (d) => intersectionY.bandwidth())
-    .attr("fill", (d) => (d.white_type === "over" ? "grey" : "green"));
+    .attr("fill", (d) => (d.white_type === "over" ? "grey" : "green"))
+    .attr("id", (d, i) => `bar-${i}`)
+    .on("mouseenter", function () {
+      d3.selectAll(".selectedBar").classed("selectedBar", false);
+      d3.selectAll(".selectedRow").classed("selectedRow", false);
+
+      d3.select(this).classed("selectedBar", true);
+      const row = d3.select(this).attr("id");
+      highlightRow(row);
+    })
+    .on("mouseleave", () => {
+      d3.selectAll(".selectedBar").classed("selectedBar", false);
+      d3.selectAll(".selectedRow").classed("selectedRow", false);
+    });
 
   bars.exit().remove();
+
+  // get relevant data for table
+  const allKeys = Object.keys(data[0]);
+  const tableKeys = [
+    "name",
+    "state",
+    "white_percent",
+    "black_percent",
+    "latino_percent",
+    "asian_percent",
+    "native_percent",
+    intersectionMetric,
+  ];
+  const nonTableKeys = allKeys.filter((key) => !tableKeys.includes(key));
+  const tableData = data.map((county) => _.omit(county, ...nonTableKeys));
+  console.log(Object.values(tableData[0]));
+  console.log(Object.keys(tableData[0]));
+
+  // update table
+  const table = d3.select("#table-body");
+  d3.select("#table-header-metric").node().innerHTML =
+    _.capitalize(intersectionMetric);
+
+  let rows = table.selectAll("tr").data(tableData);
+  rows.exit().remove();
+  rows = rows
+    .enter()
+    .append("tr")
+    .merge(rows)
+    .attr("id", (d, i) => `row-${i}`);
+  const cells = rows
+    .selectAll("td")
+    .data((d, i) => [
+      `${d.name}, ${d.state}`,
+      `${Math.round(d[intersectionMetric] * 100)}%`,
+      `${Math.round(d.white_percent * 100)}%`,
+      `${Math.round(d.black_percent * 100)}%`,
+      `${Math.round(d.asian_percent * 100)}%`,
+      `${Math.round(d.latino_percent * 100)}%`,
+      `${Math.round(d.native_percent * 100)}%`,
+    ]);
+  cells.exit().remove();
+  cells
+    .enter()
+    .append("td")
+    .text((d) => d);
+  cells.text((d) => d);
+}
+
+function highlightRow(row) {
+  const rowId = row.split("-")[1];
+  d3.select(`#row-${rowId}`).classed("selectedRow", true);
 }
 
 function init() {

@@ -1,4 +1,4 @@
-<div class="section" id="intersection">
+<div id="intersection">
   <div class="left-panel">
     <div class="svg-header">
       Top 10
@@ -25,7 +25,20 @@
         <button class="button" data-val="usage">Usage</button>
       </div>
     </div>
-    <div id="intersection-table"></div>
+    <div id="intersection-table">
+      <table>
+        <thead>
+          <th class="table-header">County</th>
+          <th class="table-header" id="table-header-metric"></th>
+          <th class="table-header">% White</th>
+          <th class="table-header">% Black</th>
+          <th class="table-header">% Asian</th>
+          <th class="table-header">% Latino</th>
+          <th class="table-header"> % Native Amer. </th>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
   </div>
   <div class="right-panel">
     <div class="svg-container" id="intersection-plot">
