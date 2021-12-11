@@ -685,19 +685,20 @@ function highlightRow(row) {
   d3.select(`#row-${rowId}`).classed("selectedRow", true);
 }
 
-function generateTypeMultiples(broadband) {
-  const margin = { top: 60, right: 0, bottom: 30, left: 60 };
-  const width = 300 - margin.left;
-  const height = 400 - margin.top;
+function generateTypeMultiples(broadband, category) {
+  const margin = { top: 60, right: 0, bottom: 30, left: 50 };
+  const width = 250 - margin.left;
+  const height = 300 - margin.top;
+  const labelOffset = margin.left;
 
   // add svgs for each class
   const svg = d3
-    .select("#static-type")
+    .select(`#static-${category}`)
     .append("svg")
     .attr("perserveAspectRatio", "xMinYMin meet")
     .attr(
       "viewBox",
-      `0 0 ${(width + margin.left + margin.right) * 3} ${
+      `0 0 ${(width + margin.left + margin.right + labelOffset) * 3} ${
         height + margin.top + margin.bottom
       }`
     );
@@ -705,38 +706,48 @@ function generateTypeMultiples(broadband) {
   // setup axes
   const x = d3.scaleLinear().domain([0, 1]).range([0, width]);
   const y = d3.scaleLinear().domain([0, 1]).range([height, margin.top]);
+  const z = d3.scaleLinear().domain([74, 11000000]).range([2, 10]);
 
-  const countyTypes = ["metro", "micro", "neither"];
+  const countyTypes =
+    category === "type"
+      ? ["metro", "micro", "neither"]
+      : ["high", "middle", "low"];
 
   countyTypes.forEach((countyType, index) => {
-    const data = broadband.filter((county) => county.type === countyType);
+    const data = broadband.filter((county) => county[category] === countyType);
     const gType = svg
       .append("g")
       .attr("id", `type-${countyType}`)
       .attr(
         "transform",
         `translate(${
-          index * (width + margin.left + margin.right) + margin.left / 2
+          index * (width + margin.left + margin.right + labelOffset) +
+          labelOffset
         }, 0)`
       );
+
+    const gTitle =
+      category === "type"
+        ? _.capitalize(countyType)
+        : `${_.capitalize(countyType)}-Income`;
 
     gType
       .append("text")
       .attr("class", "label")
-      .attr("x", (width - margin.left) / 2)
+      .attr("x", (width - margin.left - labelOffset) / 2)
       .attr("y", margin.top / 2)
       .style("text-anchor", "center")
-      .text(`${_.capitalize(countyType)} Areas`);
+      .text(`${gTitle} Areas`);
 
     gType
       .selectAll("circle")
       .data(data)
       .enter()
       .append("circle")
-      .attr("r", 2)
+      .attr("r", (d) => z(d.total))
       .attr("cx", (d) => x(d.availability))
       .attr("cy", (d) => y(d.usage))
-      .attr("class", `${countyType}-dots`)
+      .attr("class", `dots ${countyType}-dots`)
       .attr("fill", "blue");
 
     gType
@@ -746,6 +757,24 @@ function generateTypeMultiples(broadband) {
     gType
       .append("g")
       .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")));
+
+    gType
+      .append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width)
+      .attr("y", height + margin.bottom * 1.5)
+      .attr("class", "axes-lables")
+      .style("font-size", "12px")
+      .text("Availability (% of population)");
+
+    gType
+      .append("text")
+      .attr("text-anchor", "end")
+      .attr("x", -margin.top)
+      .attr("y", margin.left - labelOffset * 1.85)
+      .attr("transform", "rotate(-90)")
+      .style("font-size", "10px")
+      .text("Usage (% of population)");
   });
 }
 
@@ -758,7 +787,8 @@ function init() {
 
     setupCartogram({ us, broadband });
     setupComparison({ broadband, averages });
-    generateTypeMultiples(broadband);
+    generateTypeMultiples(broadband, "type");
+    generateTypeMultiples(broadband, "class");
     setupIntersection(broadband);
   });
 }
