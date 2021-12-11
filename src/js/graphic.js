@@ -580,6 +580,7 @@ function setupIntersection(broadband) {
 - https://stackoverflow.com/questions/65065161/dynamically-update-styling-on-button-click-d3-bar-chart
 - http://bl.ocks.org/phoebebright/3098488
 - https://www.cloudhadoop.com/2020/02/different-ways-of-remove-property-in.html
+- https://javascript.tutorialink.com/creating-a-table-with-d3/
 */
 
 function updateIntersection(data) {
@@ -684,6 +685,70 @@ function highlightRow(row) {
   d3.select(`#row-${rowId}`).classed("selectedRow", true);
 }
 
+function generateTypeMultiples(broadband) {
+  const margin = { top: 60, right: 0, bottom: 30, left: 60 };
+  const width = 300 - margin.left;
+  const height = 400 - margin.top;
+
+  // add svgs for each class
+  const svg = d3
+    .select("#static-type")
+    .append("svg")
+    .attr("perserveAspectRatio", "xMinYMin meet")
+    .attr(
+      "viewBox",
+      `0 0 ${(width + margin.left + margin.right) * 3} ${
+        height + margin.top + margin.bottom
+      }`
+    );
+
+  // setup axes
+  const x = d3.scaleLinear().domain([0, 1]).range([0, width]);
+  const y = d3.scaleLinear().domain([0, 1]).range([height, margin.top]);
+
+  const countyTypes = ["metro", "micro", "neither"];
+
+  countyTypes.forEach((countyType, index) => {
+    const data = broadband.filter((county) => county.type === countyType);
+    const gType = svg
+      .append("g")
+      .attr("id", `type-${countyType}`)
+      .attr(
+        "transform",
+        `translate(${
+          index * (width + margin.left + margin.right) + margin.left / 2
+        }, 0)`
+      );
+
+    gType
+      .append("text")
+      .attr("class", "label")
+      .attr("x", (width - margin.left) / 2)
+      .attr("y", margin.top / 2)
+      .style("text-anchor", "center")
+      .text(`${_.capitalize(countyType)} Areas`);
+
+    gType
+      .selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("r", 2)
+      .attr("cx", (d) => x(d.availability))
+      .attr("cy", (d) => y(d.usage))
+      .attr("class", `${countyType}-dots`)
+      .attr("fill", "blue");
+
+    gType
+      .append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(".0%")));
+    gType
+      .append("g")
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")));
+  });
+}
+
 function init() {
   // load necessary datasets
   loadData(["usTopo.json", "broadband.csv", "averages.csv"]).then((result) => {
@@ -693,6 +758,7 @@ function init() {
 
     setupCartogram({ us, broadband });
     setupComparison({ broadband, averages });
+    generateTypeMultiples(broadband);
     setupIntersection(broadband);
   });
 }
