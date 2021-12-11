@@ -1,23 +1,37 @@
-<div id="intersection">
-  <div class="left-panel">
+<div class="chart-area">
+  <div class="title">
     <div class="svg-header">
-      Top 10
-      <span>Low-</span>Income
-      <span>Metro</span>
-      Areas with the Lowest
-      <span>Availability</span>
+      Top 10 Lowest Metric Counties by Type, Income, and Race
     </div>
-    <div class="controls">
-      <div id="type">
+    <div class="svg-subheader">Low-income counties where over
+      <span class="blue-highlight">
+        50% or more of the population is not white
+      </span>
+      may be most impacted by the divide, even in metro areas.
+    </div>
+    <div class="svg-note">Blue bars represent counties where majority of the
+      population is not white and grey bars represent counties where majority of
+      the population is white.</div>
+  </div>
+  <div class="controls">
+    <div class="control-group" id="type">
+      <label class="control-label"> County Type: </label>
+      <div>
         <button class="button current" data-val="metro">Metro</button>
         <button class="button" data-val="micro">Micro</button>
         <button class="button" data-val="neither">Neither</button>
       </div>
-      <div id="class">
+    </div>
+    <div class="control-group" id="class">
+      <label class="control-label">Income Type: </label>
+      <div>
         <button class="button current" data-val="low">Low</button>
         <button class="button" data-val="high">High</button>
       </div>
-      <div id="metric">
+    </div>
+    <div class="control-group" id="metric">
+      <label class="control-label"> Metric: </label>
+      <div>
         <button
           class="button current"
           data-val="availability"
@@ -25,23 +39,27 @@
         <button class="button" data-val="usage">Usage</button>
       </div>
     </div>
-    <div id="intersection-table">
-      <table>
-        <thead>
-          <th class="table-header">County</th>
-          <th class="table-header" id="table-header-metric"></th>
-          <th class="table-header">% White</th>
-          <th class="table-header">% Black</th>
-          <th class="table-header">% Asian</th>
-          <th class="table-header">% Latino</th>
-          <th class="table-header"> % Native Amer. </th>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
   </div>
-  <div class="right-panel">
-    <div class="svg-container" id="intersection-plot">
+  <div id="intersection">
+    <div class="left-panel">
+      <div id="intersection-table">
+        <table>
+          <thead>
+            <th class="table-header">County</th>
+            <th class="table-header" id="table-header-metric"></th>
+            <th class="table-header">White</th>
+            <th class="table-header">Black</th>
+            <th class="table-header">Asian</th>
+            <th class="table-header">Latino</th>
+            <th class="table-header">Native Amer. </th>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="svg-container" id="intersection-plot">
+      </div>
     </div>
   </div>
 </div>

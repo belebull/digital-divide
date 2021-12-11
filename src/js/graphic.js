@@ -411,7 +411,7 @@ function generateIntersection(broadband) {
   const container = d3.select("#intersection").node();
   const margin = { top: 20, bottom: 20, right: 0, left: 60 };
   const width = window.innerWidth / 4 - margin.left - margin.right;
-  const height = 10 * 40 - margin.top - margin.bottom;
+  const height = 350 - margin.top - margin.bottom;
 
   // append SVG
   const svg = d3
@@ -559,13 +559,14 @@ function updateIntersection(data) {
   data.forEach((county) => domain.push(+county[intersectionMetric]));
 
   intersectionX.domain([0, d3.max(domain)]).ticks(4);
+
   intersectionY.domain(data.map((d) => `${d.name}, ${d.state}`));
 
   svg
     .select("#intersection-x")
     .transition()
     .duration(1000)
-    .call(d3.axisBottom(intersectionX));
+    .call(d3.axisBottom(intersectionX).tickFormat(d3.format(".0%")));
   svg
     .select("#intersection-y")
     .transition()
@@ -583,7 +584,9 @@ function updateIntersection(data) {
     .attr("y", (d) => intersectionY(`${d.name}, ${d.state}`))
     .attr("width", (d) => intersectionX(d[intersectionMetric]))
     .attr("height", (d) => intersectionY.bandwidth())
-    .attr("fill", (d) => (d.white_type === "over" ? "grey" : "green"))
+    .attr("fill", (d) => (d.white_type === "over" ? "#c9c9c9" : "#253494"))
+    .attr("stroke", (d) => (d.white_type === "under" ? "#081d58" : "#5b5b5b"))
+    .attr("stroke-width", "0.5")
     .attr("id", (d, i) => `bar-${i}`)
     .on("mouseenter", function () {
       d3.selectAll(".selectedBar").classed("selectedBar", false);
@@ -628,7 +631,8 @@ function updateIntersection(data) {
     .enter()
     .append("tr")
     .merge(rows)
-    .attr("id", (d, i) => `row-${i}`);
+    .attr("id", (d, i) => `row-${i}`)
+    .attr("class", "table-rows");
   const cells = rows
     .selectAll("td")
     .data((d, i) => [
@@ -655,8 +659,8 @@ function highlightRow(row) {
 
 function generateTypeMultiples(broadband, category) {
   const margin = { top: 60, right: 0, bottom: 30, left: 50 };
-  const width = 175 - margin.left;
-  const height = 225 - margin.top;
+  const width = 250 - margin.left;
+  const height = 300 - margin.top;
   const labelOffset = margin.left;
 
   // add svgs for each class

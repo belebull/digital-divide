@@ -1,23 +1,60 @@
 .button.current
-  background-color black
+  background-color $dark-blue
   color white
 
 .button
-  background grey
-  color white
+  background $white
+  color $dark-blue
+  border 1px solid $dark-blue
+  padding 10px
+  border-radius 5px
+
+.button:hover
+  color $dark-blue
+  background-color: $gray-light
+
 
 #intersection
   display flex
   flex-direction row
-  justify-content space-between
+  justify-content space-around
+  padding 50px
 
 .left-panel
-  flex-basis 30%
-  flex-shrink: 2
-
-.selectedBar
-  stroke black
+  flex-basis 60%
 
 .selectedRow
-  background-color: rgb(218, 255, 193)
+  background-color: $teal
 
+.controls
+  display inline-flex
+  margin-top 40px
+
+.control-group
+  margin-right 10px
+
+.control-label
+  text-align: left
+  margin-bottom 10px
+  font-weight 600
+
+#intersection-table
+  font-size: 1em
+  font-family: $sans
+
+.table-header
+  font-weight: 600
+  width 100%
+  padding 10px
+
+.table-rows
+  padding 10px
+  border-bottom 1px solid $gray-dark
+
+.table-rows > td
+  text-align center
+
+.selectedBar
+  fill $teal
+  stroke $dark-teal
+  stroke-width 1
