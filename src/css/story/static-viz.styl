@@ -1,7 +1,23 @@
+#static-viz
+  padding-left 30px
+
 .static-container
   display flex
   flex-direction column
   justify-content space-between
 
-.dots.metro-dots
-  opactiy 0.5
+.metro-dots, .high-dots
+  fill $dark-blue
+  stroke $darkest-blue
+  stroke-width 0.75
+
+.micro-dots, .middle-dots
+  fill $light-blue
+  stroke $corn-flower
+  stroke-width 0.75
+
+.neither-dots, .low-dots
+  fill $teal
+  stroke $dark-teal
+  stroke-width 0.75
+  opacity 0.6

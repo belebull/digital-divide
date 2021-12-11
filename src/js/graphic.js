@@ -655,8 +655,8 @@ function highlightRow(row) {
 
 function generateTypeMultiples(broadband, category) {
   const margin = { top: 60, right: 0, bottom: 30, left: 50 };
-  const width = 250 - margin.left;
-  const height = 300 - margin.top;
+  const width = 175 - margin.left;
+  const height = 225 - margin.top;
   const labelOffset = margin.left;
 
   // add svgs for each class
@@ -705,7 +705,8 @@ function generateTypeMultiples(broadband, category) {
       .attr("x", (width - margin.left - labelOffset) / 2)
       .attr("y", margin.top / 2)
       .style("text-anchor", "center")
-      .text(`${gTitle} Areas`);
+      .text(`${gTitle} Areas`)
+      .style("font-size", "14px");
 
     gType
       .selectAll("circle")
@@ -715,8 +716,8 @@ function generateTypeMultiples(broadband, category) {
       .attr("r", (d) => z(d.total))
       .attr("cx", (d) => x(d.availability))
       .attr("cy", (d) => y(d.usage))
-      .attr("class", `dots ${countyType}-dots`)
-      .attr("fill", "blue");
+      .attr("class", `${countyType}-dots`)
+      .attr("opacity", "0.3");
 
     gType
       .append("g")
@@ -732,7 +733,7 @@ function generateTypeMultiples(broadband, category) {
       .attr("x", width)
       .attr("y", height + margin.bottom * 1.5)
       .attr("class", "axes-lables")
-      .style("font-size", "12px")
+      .style("font-size", "10px")
       .text("Availability (% of population)");
 
     gType
