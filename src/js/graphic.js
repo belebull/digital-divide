@@ -144,9 +144,9 @@ function generateCartogram(data) {
     .append("path")
     .datum(topojson.mesh(us, us.objects.counties), (a, b) => a !== b)
     .attr("fill", "none")
-    .attr("stroke", "white")
+    .attr("stroke", "black")
     .attr("stroke-linejoin", "round")
-    .attr("stroke-width", 0.5)
+    .attr("stroke-width", 1)
     .attr("d", path);
 
   return countyPaths;
@@ -782,9 +782,15 @@ function init() {
   // load necessary datasets
   loadData(["usTopo.json", "broadband.csv", "averages.csv"]).then((result) => {
     const us = result[0];
-    const broadband = result[1];
+    let broadband = result[1];
     const averages = result[2];
 
+    // clean data
+    broadband = broadband.filter(
+      (county) => county.availability !== "" && county.usage !== ""
+    );
+
+    // render graphs
     setupCartogram({ us, broadband });
     setupComparison({ broadband, averages });
     generateTypeMultiples(broadband, "type");
