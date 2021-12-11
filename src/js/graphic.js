@@ -217,105 +217,76 @@ function populateStates(broadband) {
 - https://www.d3-graph-gallery.com/graph/custom_axis.html#axistitles
 */
 function generateComparison(broadband) {
-  // create SVG and set dimensions
-  const svg = d3.select("div#comparison-plot").append("svg");
-  const container = svg.node().parentNode;
   const margin = {
     top: 30,
-    bottom: 10,
-    right: container.clientWidth / 6,
-    left: container.clientWidth / 6,
+    bottom: 50,
+    right: 25,
+    left: 50,
   };
-  const axisOffset = 10;
-  const labelOffset = 30;
-  const width = (container.clientWidth * 2) / 3;
-  const height = (width * 2) / 3; // accounts for the height of the sticky header
-
-  const tooltip = d3
-    .select("div#comparison-plot")
-    .append("div")
-    .style("visbility", "hidden")
-    .attr("class", "tooltip");
-
-  const showTooltip = function (event, d) {
-    tooltip.style("visibility", "visible").html(d.name);
-  };
-
-  const moveTooltip = function (event, d) {
-    const [x, y] = d3.pointer(event);
-    tooltip.attr("transform", `translate(${x}, ${y})`);
-  };
-
-  const hideTooltip = function (event, d) {
-    tooltip.style("visibility", "hidden");
-  };
+  const labelOffset = margin.left;
+  const width = 275 - margin.left - margin.right;
+  const height = 250 - margin.top - margin.bottom; // accounts for the height of the sticky header
 
   // make SVG responsive to window size changes
-  svg
+  const svg = d3
+    .select("div#comparison-plot")
+    .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr(
       "viewBox",
-      `0 0 ${width + margin.left + margin.right + axisOffset + labelOffset} ${
-        height + margin.top + margin.bottom + labelOffset
+      `0 0 ${width + margin.left + margin.right + labelOffset} ${
+        height + margin.top + margin.bottom
       }`
     )
-    .classed("svg-content", true);
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
   // create axes scales
-  x = d3
-    .scaleLinear()
-    .domain([0, 1])
-    .range([margin.left + axisOffset, width]);
+  x = d3.scaleLinear().domain([0, 1]).range([0, width]);
 
-  y = d3
-    .scaleLinear()
-    .domain([0, 1])
-    .range([height, margin.top - axisOffset]);
+  y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 
-  const z = d3.scaleLinear().domain([74, 10105722]).range([1.5, 30]);
-
-  // place scales correctly within container
-  svg
-    .append("g")
-    .attr("transform", `translate(0, ${height - margin.bottom + axisOffset})`)
-    .call(d3.axisBottom(x).tickSize(5).tickFormat(d3.format(".0%")));
+  const z = d3.scaleLinear().domain([70, 11000000]).range([0.75, 10]);
 
   svg
     .append("g")
-    .attr("transform", `translate(${margin.left}, 0)`)
-    .call(d3.axisLeft(y).tickSize(5).tickFormat(d3.format(".0%")));
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(".0%")));
+
+  svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")));
 
   // add axes labels
   svg
     .append("text")
     .attr("text-anchor", "end")
     .attr("x", width)
-    .attr("y", height + axisOffset + 35)
-    .style("font-size", "14px")
-    .text("Availability (% of population)");
+    .attr("y", height + margin.bottom * 0.75)
+    .attr("class", "svg-axis-label")
+    .attr("id", "comparison-availability-line")
+    .style("background-color", "#41b6c4")
+    .text("Availability (% of population)")
+    .style("color", "white");
 
   svg
     .append("text")
     .attr("text-anchor", "end")
-    .attr("x", -labelOffset)
-    .attr("y", margin.left - labelOffset - axisOffset * 2)
+    .attr("x", -margin.top / 2)
+    .attr("y", -margin.left + 10)
     .attr("transform", "rotate(-90)")
-    .style("font-size", "14px")
+    .attr("class", "svg-axis-label")
+    .attr("id", "comparison-usage-line")
     .text("Usage (% of population)");
 
+  // place scales correctly within container
   comparisonPoints = svg
     .append("g")
     .selectAll("dot")
     .data(broadband)
-    .enter()
-    .append("circle")
+    .join("circle")
     .attr("cx", (d) => x(d.availability))
     .attr("cy", (d) => y(d.usage))
     .attr("r", (d) => z(d.total))
-    .attr("class", "comparison-selected")
-    .on("mouseover", showTooltip)
-    .on("mousemove", moveTooltip)
-    .on("mouseout", hideTooltip);
+    .attr("class", "comparison-selected");
 
   // add median lines to the scatter plot
   availabilityLine = svg
@@ -324,10 +295,8 @@ function generateComparison(broadband) {
     .attr("x2", x(availabilityAvg))
     .attr("y1", y(0))
     .attr("y2", y(1))
-    .attr("stroke", "#750175")
-    .attr("stroke-width", 2)
-    .attr("stroke-dasharray", 5)
-    .attr("opacity", 0.5);
+    .attr("stroke", "#2c7fb8")
+    .attr("stroke-width", 0.75);
 
   usageLine = svg
     .append("line")
@@ -335,9 +304,8 @@ function generateComparison(broadband) {
     .attr("x2", x(1))
     .attr("y1", y(usageAvg))
     .attr("y2", y(usageAvg))
-    .attr("stroke", "#ea519d")
-    .attr("stroke-width", 2)
-    .attr("stroke-dasharray", 3);
+    .attr("stroke", "#081d58")
+    .attr("stroke-width", 0.75);
 }
 
 // SOURCE: https://www.tutorialsteacher.com/d3js/animation-with-d3js

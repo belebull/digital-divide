@@ -1,13 +1,37 @@
+#comparison-plot
+  display inline-block
+  margin-left 15%
+  margin-right 15%
 
-.comparison
-  display: flex
-  flex-direction: row
-  justify-content: space-around
+#comparison-state
+  background-color none
+  font-size 18px
+  font-family $sans-display
+  border none
+  border-bottom 3px solid $teal
+  padding 10px
+
+#comparison-availability-text
+  color white
+  background-color $light-blue
+  padding 5px
+  margin 0px 3px
+  border-radius 2px
+  font-weight: 600
+
+#comparison-usage-text
+  color white
+  background-color $darkest-blue
+  padding 5px
+  margin 0px 3px
+  border-radius 2px
+  font-weight: 600
 
 .comparison-selected
-  fill #fbabb8
-  stroke #f880aa
-  opacity 0.7
+  fill $teal
+  stroke $light-blue
+  stroke-width: 0.25
+  opacity 0.65
   visibility visible
 
 .comparison-unselected

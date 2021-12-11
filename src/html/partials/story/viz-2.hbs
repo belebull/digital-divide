@@ -1,17 +1,29 @@
-<div class="section" id="comparison">
-  <div class="controls"></div>
-  <div class="svg-container" id="comparison-plot">
+<div class="chart-area" id="comparison">
+  <div class="svg-title">
     <div class="svg-header" id="comparison-header">Broadband Availability vs.
       Usage</div>
     <div class="svg-subheader" id="comparison-subheader">
-      <span> In
+      <span>
+        In
         <select class="svg-input" id="comparison-state"></select>
         , on average,
       </span>
-      <span class="svg-output" id="comparison-availability"> 20% </span>
-      <span> of each county has <span>
-      <span> access to broadband </span>
+      <span id="comparison-availability-text"><span
+          class="svg-output"
+          id="comparison-availability"
+        > 20% </span>
+        of each county has access to broadband
+      </span>
       <span id="comparison-conjunction"> but only </span>
-      <span class="svg-output" id="comparison-usage"> 40% </span> <span> is actually using it. </span>
+      <span id="comparison-usage-text"><span
+          class="svg-output"
+          id="comparison-usage"
+        > 40% </span>
+        makes use of it.
+      </span>
+    </div>
+    <div class="svg-note">Select a state to see other counties. The larger the
+      circle, the larger the county's popualtion.</div>
   </div>
+  <div id="comparison-plot"></div>
 </div>

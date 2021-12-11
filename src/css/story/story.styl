@@ -1,22 +1,47 @@
-/* CUSTOM STORY STYLE */
+/* SECTION */
 .section
   margin 50px 100px
   min-height: 600px
 
-//SOURCE: https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/
-.svg-container
-  display inline-block
-  position relative
+.chart-area
+  font-family $sans
+  background-color: $off-white
+  padding-top 50px
   width 100%
-  height 100%
-  overflow hidden
+  text-align center
 
-.svg-content
-  display inline-block
-  position relative
-  height: 100%
-  top 0
-  left 0
+.article-text
+  font-size 14px
+  margin-left 30%
+  margin-right 30%
+  margin-top 30px
+  margin-bottom 50px
+  text-align center
+  display block
+
+
+/*CHART STYLES*/
+.svg-header
+  font-family $sans
+  font-size 24px
+  line-height 48px
+  font-weight 600
+
+.svg-subheader
+    font-size 18px
+    line-height 36px
+
+.svg-note
+    font-size 14px
+    font-style: italic
+    color $gray-dark
+    line-height: 28px
+    margin 10px
+
+.svg-axis-label
+  font-size: 10px
+  font-family: $sans-display
+  color $gray-dark
 
 .tooltip
   background-color white
