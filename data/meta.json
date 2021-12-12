@@ -1,12 +1,12 @@
 {
   "title": "Visualizing the Digital Divide",
   "description": "In a modern world, who has access to internet in the United States?",
-  "site": "https://pudding.cool",
-  "siteName": "The Pudding",
-  "url": "https://pudding.cool/year/month/name/",
+  "site": "https://site.com",
+  "siteName": "",
+  "url": "https://site.com/year/month/name/",
   "keywords": "tk",
-  "imgFacebook": "https://pudding.cool/year/month/name/assets/social/social-facebook.jpg",
-  "imgTwitter": "https://pudding.cool/year/month/name/assets/social/social-twitter.jpg",
+  "imgFacebook": "https://site.com/year/month/name/assets/social/social-facebook.jpg",
+  "imgTwitter": "https://site.com/year/month/name/assets/social/social-twitter.jpg",
   "author": {
     "name": "Beleicia Bullock",
     "url": "https://beleiciabullock.com",

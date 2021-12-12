@@ -45,7 +45,7 @@ function loadData() {
   }, {});
 
   data.timestamp = Date.now();
-  data.basepath = ENV === 'dev' ? '' : 'https://pudding.cool/';
+  data.basepath = ENV === 'dev' ? '' : '';
   return Promise.resolve(data);
 }
 
