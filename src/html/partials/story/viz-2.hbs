@@ -25,5 +25,36 @@
     <div class="svg-note">Select a state to see other counties. The larger the
       circle, the larger the county's popualtion.</div>
   </div>
-  <div id="comparison-plot"></div>
+  <div class="graphic-content">
+    <div class="left-panel" id="comparison-plot"></div>
+    <div class="right-panel">
+      <div id="comparison-table-header">
+        <span class="selection">United States</span>
+        Counties
+      </div>
+      <div class="comparison-table-callout">
+        <div class="table-stat">
+          <div id="comparison-table-stat-usage"></div>
+          <div>Estimated number of people without access to internet in
+            <span class="selection"></span>
+          </div>
+        </div>
+        <div class="table-stat">
+          <div id="comparison-table-stat-availability"></div>
+          <div>Estimated number of people who do not use the internet in
+            <span class="selection"></span>
+          </div>
+        </div>
+      </div>
+      <div class="table" id="comparison-table">
+        <table id="comparison-table">
+          <thead>
+            <th class="table-header">County</th>
+            <th class="table-header">Availability</th>
+            <th class="table-header">Usage</th>
+          </thead>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

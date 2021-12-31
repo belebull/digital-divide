@@ -47,7 +47,7 @@ let intersectionMetric;
 
 function resize() {}
 
-/* FIRST VISULIZATION */
+/* FIRST VISULIZATION - Cartogram of Usage and Availability Across the US*/
 function fixDiscrepancies(data) {
   const { counties, broadband } = data;
   const topoIds = [];
@@ -199,7 +199,7 @@ function updateCartogram() {
     .toLocaleString("en-US");
 }
 
-/* SECOND VISUALIZATION */
+/* SECOND VISUALIZATION - Comparison of Usage and Availability*/
 
 // SOURCE: https://stackoverflow.com/questions/15125920/how-to-get-distinct-values-from-an-array-of-objects-in-javascript
 function populateStates(broadband) {
@@ -400,7 +400,7 @@ function setupComparison(data) {
   comparisonDropdown.on("input", updateComparison);
 }
 
-/* THIRD VISUALIZATION */
+/* THIRD VISUALIZATION - Intersection of Race, Income and County Type */
 
 /* SOURCES:
 - https://jsfiddle.net/ysr5aohw/
