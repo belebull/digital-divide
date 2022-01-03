@@ -110,14 +110,13 @@ SOURCES:
 function generateCartogram(data) {
   const { us, counties } = data;
   // set dimensions of map container for projection
-  const width =
-    document.getElementsByClassName("chart-cartogram")[0].offsetWidth;
+  const width = document.getElementById("vis-cartogram").offsetWidth;
   const aspectRatio = 5 / 8;
   const height = width * aspectRatio;
 
   // create map container
   const svg = d3
-    .select(".chart-cartogram")
+    .select("#vis-cartogram")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
@@ -156,8 +155,8 @@ function setupCartogram(data) {
   const { us, broadband } = data;
 
   // get necessary elements
-  percentageSlider = d3.select("#percentage-slider-input");
-  percentageText = d3.select("#percentage-text");
+  percentageSlider = d3.select("#cartogram-slider");
+  percentageText = d3.select("#cartogram-percentage");
   summaryCount = d3.select("#summary-count").node();
   summaryType = d3.select("#summary-type");
 
@@ -617,8 +616,6 @@ function updateIntersection(data) {
   ];
   const nonTableKeys = allKeys.filter((key) => !tableKeys.includes(key));
   const tableData = data.map((county) => _.omit(county, ...nonTableKeys));
-  console.log(Object.values(tableData[0]));
-  console.log(Object.keys(tableData[0]));
 
   // update table
   const table = d3.select("#table-body");

@@ -1,27 +1,31 @@
-<div class="chart-area chart-cartogram">
-  <div class="summary cartogram-summary">
-    Of the 3,140 counties in our dataset, there are
-    <span class="plot-output"><span id="summary-count"></span> counties</span>
-    where
-    <span class="summary-percentage">
-      <span class="plot-output" id="percentage-text"></span>
-      <span class="percentage-slider">
-        <input
-          type="range"
-          name="percentage-slider-input"
-          id="percentage-slider-input"
-          min="0"
-          max="100"
-          step="10"
-        />
+<div class="visualization" id="vis-cartogram">
+  <div class="header">
+    <div class="title">Broadband Availability and Usage Across U.S. Counties</div>
+    <div class="subtitle">
+      <span> Of the 3,140 counties in our data, there are </span>
+      <span class="highlight">
+        <span id="summary-count"></span>
+        <span> counties </span>
       </span>
-    </span>
-    <br />
-    of the county's residents
-    <select name="type" id="summary-type">
-      <option value="availability">has access to broadband</option>
-      <option value="usage">uses broadband</option>
-    </select>
-    <span>.</span>
+      <span>&nbsp;where</span>
+      <span class="inputs">
+        <span class="highlight" id="cartogram-percentage"></span>
+        <span>
+          <input
+            type="range"
+            id="cartogram-slider"
+            min="0"
+            max="100"
+            step="10"
+          />
+        </span>
+      </span>
+      of the county's residents
+      <select name="type" class="inputs selection" id="summary-type">
+        <option value="availability">has access to broadband</option>
+        <option value="usage">uses broadband</option>
+      </select>
+      <span>.</span>
+    </div>
   </div>
 </div>
