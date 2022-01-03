@@ -617,8 +617,6 @@ function updateIntersection(data) {
   ];
   const nonTableKeys = allKeys.filter((key) => !tableKeys.includes(key));
   const tableData = data.map((county) => _.omit(county, ...nonTableKeys));
-  console.log(Object.values(tableData[0]));
-  console.log(Object.keys(tableData[0]));
 
   // update table
   const table = d3.select("#table-body");
@@ -656,6 +654,8 @@ function highlightRow(row) {
   const rowId = row.split("-")[1];
   d3.select(`#row-${rowId}`).classed("selectedRow", true);
 }
+
+/* STATIC VISUALIZATIONS - Race and Class*/
 
 function generateTypeMultiples(broadband, category) {
   const margin = { top: 60, right: 0, bottom: 30, left: 50 };
@@ -751,6 +751,7 @@ function generateTypeMultiples(broadband, category) {
   });
 }
 
+/* INITIALIZE VISUALIZATIONS */
 function init() {
   // load necessary datasets
   loadData(["usTopo.json", "broadband.csv", "averages.csv"]).then((result) => {
