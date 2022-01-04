@@ -284,10 +284,28 @@ function generateComparison(broadband) {
   // create functionality for tooltip
   let hover = function (event, d) {
     tooltip.style("visibility", "visible").html(
-      `<div class="tooltip-contents"><div class="tooltip-title"><span class="tooltip-name">
-          ${d.name}, ${d.state}</span><span class="tooltip-score">
-          ${d.usage}%</span></div><div class="tooltip-address">
-          ${d.availability}%</div></div>`
+      `<div class="tooltip-contents">
+        <div class="tooltip-header">
+          <div class="tooltip-title">${d.name}, ${d.state}</div>
+          <div class="tooltip-population"><span>Population: </span><span>${(
+            d.total * 1
+          ).toLocaleString()}</span></div>
+        </div>
+        <div class="tooltip-stats">
+          <div class="tooltip-availability">
+            <div class="tooltip-stat"> ${(
+              d.availability * 100
+            ).toLocaleString()}% </div>
+            <div class="tooltip-description"> have access to broadband </div>
+          </div>
+          <div class="tooltip-usage">
+            <div class="tooltip-stat"> ${(
+              d.usage * 100
+            ).toLocaleString()}% </div>
+            <div class="tooltip-description"> are using broadband</div>
+          </div>
+        </div>
+      </div>`
     );
   };
 

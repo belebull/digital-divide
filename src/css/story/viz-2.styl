@@ -3,6 +3,10 @@
   height 100%
   padding 25px
 
+// inputs
+#comparison-state
+  border-bottom: 3px solid $teal
+
 // axes and lines
 #comparison-x
   fill $dark-blue
@@ -44,3 +48,33 @@
   border-radius 3px
   padding 10px
   position absolute
+  text-align: center
+  width 350px
+
+.tooltip-contents
+  width 100%
+
+.tooltip-header
+  margin-bottom: 15px
+
+.tooltip-title
+  font-weight: 600
+  margin-bottom: 5px
+
+.tooltip-stats
+  display flex
+  flex-direction: row
+  justify-content: space-around
+
+.tooltip-availability
+  color $dark-blue
+
+.tooltip-usage
+  color $light-blue
+
+.tooltip-stat
+  font-size large
+  font-weight: 600
+
+.tooltip-description
+  font-size x-small
