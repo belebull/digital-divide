@@ -281,6 +281,7 @@ function generateComparison(broadband) {
     .style("visibility", "hidden")
     .attr("class", "tooltip");
 
+  // create functionality for tooltip
   let hover = function (event, d) {
     tooltip.style("visibility", "visible").html(
       `<div class="tooltip-contents"><div class="tooltip-title"><span class="tooltip-name">
@@ -300,7 +301,7 @@ function generateComparison(broadband) {
     tooltip.style("visibility", "hidden");
   };
 
-  // place scales correctly within container
+  // add points to the scatteplot
   comparisonPoints = svg
     .append("g")
     .selectAll("dot")
@@ -374,6 +375,7 @@ function updateComparison() {
 // SOURCE: https://stackoverflow.com/questions/8674618/adding-options-to-select-with-javascript
 function setupComparison(data) {
   const { broadband, averages } = data;
+
   // calculate the average of the county metrics
   availability = [];
   usage = [];
@@ -683,26 +685,22 @@ function highlightRow(row) {
 
 function generateTypeMultiples(broadband, category) {
   const margin = { top: 60, right: 0, bottom: 30, left: 50 };
-  const width = 250 - margin.left;
-  const height = 300 - margin.top;
+  const width = 400 - margin.left;
+  const height = 400 - margin.top;
   const labelOffset = margin.left;
 
   // add svgs for each class
   const svg = d3
     .select(`#static-${category}`)
     .append("svg")
-    .attr("perserveAspectRatio", "xMinYMin meet")
-    .attr(
-      "viewBox",
-      `0 0 ${(width + margin.left + margin.right + labelOffset) * 3} ${
-        height + margin.top + margin.bottom
-      }`
-    );
+    .attr("class", "chart")
+    .attr("width", (width + margin.left + margin.right + labelOffset) * 3)
+    .attr("height", height + margin.top + margin.bottom);
 
   // setup axes
   const x = d3.scaleLinear().domain([0, 1]).range([0, width]);
   const y = d3.scaleLinear().domain([0, 1]).range([height, margin.top]);
-  const z = d3.scaleLinear().domain([74, 11000000]).range([2, 10]);
+  const z = d3.scaleLinear().domain([74, 11000000]).range([4, 40]);
 
   const countyTypes =
     category === "type"
@@ -730,11 +728,11 @@ function generateTypeMultiples(broadband, category) {
     gType
       .append("text")
       .attr("class", "label")
-      .attr("x", (width - margin.left - labelOffset) / 2)
+      .attr("x", (width - margin.left - labelOffset * 1.5) / 2)
       .attr("y", margin.top / 2)
       .style("text-anchor", "center")
-      .text(`${gTitle} Areas`)
-      .style("font-size", "14px");
+      .attr("class", "static-titles")
+      .text(`${gTitle} Areas`);
 
     gType
       .selectAll("circle")
@@ -744,8 +742,9 @@ function generateTypeMultiples(broadband, category) {
       .attr("r", (d) => z(d.total))
       .attr("cx", (d) => x(d.availability))
       .attr("cy", (d) => y(d.usage))
+      .attr("class", "static-dots")
       .attr("class", `${countyType}-dots`)
-      .attr("opacity", "0.3");
+      .style("opacity", "0.3");
 
     gType
       .append("g")
