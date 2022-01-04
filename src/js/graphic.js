@@ -436,26 +436,20 @@ function setupComparison(data) {
 - https://www.d3-graph-gallery.com/graph/barplot_horizontal.html
 */
 function generateIntersection(broadband) {
-  const container = d3.select("#intersection").node();
   const margin = { top: 20, bottom: 20, right: 0, left: 60 };
-  const width = window.innerWidth / 4 - margin.left - margin.right;
-  const height = 350 - margin.top - margin.bottom;
+  const width = window.innerWidth / 2 - margin.left - margin.right;
+  const height = 600 - margin.top - margin.bottom;
 
   // append SVG
   const svg = d3
-    .select("#intersection-plot")
+    .select("#intersection")
     .append("svg")
-    .attr("perserveAspectRatio", "xMinYMin meet")
-    .attr(
-      "viewBox",
-      `0 0 ${width + margin.left + margin.right} ${
-        height + margin.top + margin.bottom
-      }`
-    )
+    .attr("width", width + margin.left + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
     .classed("svg-content", true)
     .append("g")
     .attr("transform", `translate (${margin.left}, ${margin.top})`)
-    .attr("id", "intersection-plotSVG");
+    .attr("id", "intersection-bars");
 
   // create axes functions
   intersectionX = d3.scaleLinear().range([0, width]);
@@ -483,23 +477,6 @@ function generateIntersection(broadband) {
   );
 
   updateIntersection(data);
-
-  // // get domain for availability
-  // const domain = [];
-  // data.forEach((county) => domain.push(+county.availability));
-
-  // add axes to SVGs
-
-  // const bars = svg
-  //   .selectAll("rect")
-  //   .data(data)
-  //   .join("rect")
-  //   .attr("x", intersectionX(0) + margin.left)
-  //   .attr("y", (d) => intersectionY(`${d.name}, ${d.state}`))
-  //   .attr("width", (d) => intersectionX(d.availability))
-  //   .attr("height", (d) => intersectionY.bandwidth())
-  //   .attr("fill", "blue")
-  //   .attr("class", "bars");
 }
 
 // SOURCE: https://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value?page=1&tab=votes#tab-top
@@ -517,9 +494,9 @@ function generateIntersectionData(broadband, metric, type, income) {
 
 function setupIntersection(broadband) {
   // get buttons for graph
-  typeBtns = d3.selectAll("#type .button");
-  classBtns = d3.selectAll("#class .button");
-  metricBtns = d3.selectAll("#metric .button");
+  typeBtns = d3.selectAll("#intersection-type .button");
+  classBtns = d3.selectAll("#intersection-class .button");
+  metricBtns = d3.selectAll("#intersection-metric .button");
   let newData;
 
   // set initial values
@@ -528,7 +505,7 @@ function setupIntersection(broadband) {
   intersectionMetric = "availability";
 
   typeBtns.on("click", function () {
-    d3.select("#type .current").classed("current", false);
+    d3.select("#intersection-type .current").classed("current", false);
     d3.select(this).classed("current", true);
     intersectionType = d3.select(this).attr("data-val");
     newData = generateIntersectionData(
@@ -540,7 +517,7 @@ function setupIntersection(broadband) {
     updateIntersection(newData);
   });
   classBtns.on("click", function () {
-    d3.select("#class .current").classed("current", false);
+    d3.select("#intersection-class .current").classed("current", false);
     d3.select(this).classed("current", true);
     intersectionClass = d3.select(this).attr("data-val");
     newData = generateIntersectionData(
@@ -552,7 +529,7 @@ function setupIntersection(broadband) {
     updateIntersection(newData);
   });
   metricBtns.on("click", function () {
-    d3.select("#metric .current").classed("current", false);
+    d3.select("#intersection-metric .current").classed("current", false);
     d3.select(this).classed("current", true);
     intersectionMetric = d3.select(this).attr("data-val");
     newData = generateIntersectionData(
@@ -581,8 +558,13 @@ function setupIntersection(broadband) {
 
 function updateIntersection(data) {
   // update the chart
-  const svg = d3.select("#intersection-plotSVG");
+  const svg = d3.select("#intersection-bars");
+  const intersectionTitle = d3.select("#intersection-title-metric").node();
 
+  // change title of graph
+  intersectionTitle.innerHTML = _.startCase(intersectionMetric);
+
+  // get the domain of the combindation
   const domain = [];
   data.forEach((county) => domain.push(+county[intersectionMetric]));
 
@@ -590,6 +572,7 @@ function updateIntersection(data) {
 
   intersectionY.domain(data.map((d) => `${d.name}, ${d.state}`));
 
+  // setup the axes
   svg
     .select("#intersection-x")
     .transition()
@@ -601,6 +584,7 @@ function updateIntersection(data) {
     .duration(1000)
     .call(d3.axisLeft(intersectionY));
 
+  // add the bars to the chart
   const bars = svg.selectAll(".bars").data(data);
 
   bars

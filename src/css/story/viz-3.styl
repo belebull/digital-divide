@@ -1,3 +1,4 @@
+// visualization controls
 .button.current
   background-color $dark-blue
   color white
@@ -13,19 +14,6 @@
   color $dark-blue
   background-color: $gray-light
 
-
-#intersection
-  display flex
-  flex-direction row
-  justify-content space-around
-  padding 50px
-
-.left-panel
-  flex-basis 60%
-
-.selectedRow
-  background-color: $teal
-
 .controls
   display inline-flex
   margin-top 40px
@@ -38,12 +26,28 @@
   margin-bottom 10px
   font-weight 600
 
-#intersection-table
-  font-size: 1em
+// main visualization layout
+.multi-chart
+  display flex
+  flex-direction row
+  justify-content center
+  padding 30px
+
+// table styles
+#intersection-table>table
+  border-collapse: true
   font-family: $sans
+  height: 100%
+
+.selectedRow
+  background-color: $teal
+
+.table-header-row
+  background-color: $dark-blue
+  color: $white
 
 .table-header
-  font-weight: 600
+  font-weight 600
   width 100%
   padding 10px
 
