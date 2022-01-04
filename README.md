@@ -3,7 +3,9 @@ This project was developed as a final project for Stanford's CS448: Data Visuali
 
 Since the project entailed creating a visual explainer, I utilized a starter template from the Pudding to build this article. The remainder of this README details the setup process for using this template (it is included from the original template files). 
 
-You can view the live site [here]() or run the project locally by downloading the source code and running `npm start`.
+You can view the live site [here](https://belebull.github.io/digital-divide/) or run the project locally by downloading the source code and running `npm start`.
+
+
 ---
 - [Development](#development)
   - [HTML](#html)
