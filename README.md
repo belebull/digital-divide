@@ -1,3 +1,10 @@
+# Overview
+This project was developed as a final project for Stanford's CS448: Data Visualization course. I use broadband availability availability and usage data collected by Microsoft and United States Census Data to understand how different counties are impacted by the digital divide.
+
+Since the project entailed creating a visual explainer, I utilized a starter template from the Pudding to build this article. The remainder of this README details the setup process for using this template (it is included from the original template files). 
+
+You can view the live site [here]() or run the project locally by downloading the source code and running `npm start`.
+---
 - [Development](#development)
   - [HTML](#html)
     - [Sticky Header](#sticky-header)
@@ -26,7 +33,7 @@ Any changes to the `src/` folder will trigger live reload.
 
 ## HTML
 
-**Where it goes:** `src/html/partials/story/`.
+**Whcere it goes:** `src/html/partials/story/`.
 
 The main HTML file is `src/html/index.hbs`. Generally speaking, You should mostly just include new partials in there and not modify too much of it since there are a bunch of presets.
 
@@ -61,13 +68,13 @@ Using a Google Doc for copy is recommended. We use [ArchieML](http://archieml.or
 Running `npm run doc` at any point (even in new tab while server is running) will pull down the latest, and output a file `data/doc.json`.
 
 You can now reference the JSON in your HTML, namespaced by `doc` (eg. `<p>{{doc.explanation}}</p>`).
-
+a
 You can also do the same with a [Google Sheet](#google-sheet).
 
 #### SVG Icons
 
 There is a directory called `svg` in the root of project, it contains a bunch of [icons](https://feathericons.com/). To include them in the HTML, simply do this:
-
+n 
 `<img inline src='arrow-left.svg'>`
 
 This way you can drop in svg icons anywhere in your HTML code whilst keeping it uncluttered.
