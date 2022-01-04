@@ -1,38 +1,46 @@
-#comparison-plot
-  display inline-block
-  margin-left 15%
-  margin-right 15%
+// overall chart
+#vis-comparison
+  height 100%
+  padding 25px
 
-#comparison-state
-  background-color none
-  font-size 18px
-  font-family $sans-display
-  border none
-  border-bottom 3px solid $teal
-  padding 10px
+// axes and lines
+#comparison-x
+  fill $dark-blue
 
-#comparison-availability-text
-  color white
-  background-color $light-blue
-  padding 5px
-  margin 0px 3px
-  border-radius 2px
-  font-weight: 600
+#comparison-y
+  fill $light-blue
 
-#comparison-usage-text
-  color white
-  background-color $darkest-blue
-  padding 5px
-  margin 0px 3px
-  border-radius 2px
-  font-weight: 600
+.line
+  stroke-width 2px
 
+.line-label
+  font-size x-small
+
+#availability-line
+  stroke $dark-blue
+
+#usage-line
+  stroke $light-blue
+
+// comparison points
 .comparison-selected
   fill $teal
   stroke $light-blue
   stroke-width: 0.25
-  opacity 0.65
+  opacity 0.5
   visibility visible
+  &:hover
+    fill $dark-blue
+    stroke $dark-blue
+    opacity 1
 
 .comparison-unselected
   visibility hidden
+
+// tooltips
+.tooltip
+  background-color $white
+  border 1px solid $dark-blue
+  border-radius 3px
+  padding 10px
+  position absolute

@@ -8,10 +8,10 @@ import loadData from "./load-data";
 // elements for cartogram
 let countyPaths;
 
-let summaryCount;
+let cartogramCount;
 let percentageSlider;
 let percentageText;
-let summaryType;
+let cartogramType;
 
 let threshold;
 let type;
@@ -157,8 +157,8 @@ function setupCartogram(data) {
   // get necessary elements
   percentageSlider = d3.select("#cartogram-slider");
   percentageText = d3.select("#cartogram-percentage");
-  summaryCount = d3.select("#summary-count").node();
-  summaryType = d3.select("#summary-type");
+  cartogramCount = d3.select("#cartogram-count").node();
+  cartogramType = d3.select("#cartogram-type");
 
   // set inital value of the slider
   threshold = percentageSlider.node().value;
@@ -170,14 +170,14 @@ function setupCartogram(data) {
   countyPaths = generateCartogram({ us, counties });
 
   // set inital value for number of counties
-  summaryCount.textContent = d3
+  cartogramCount.textContent = d3
     .selectAll(".selected-county")
     .size()
     .toLocaleString("en-US");
 
   // add event listeners
   percentageSlider.on("input", updateCartogram);
-  summaryType.on("input", updateCartogram);
+  cartogramType.on("input", updateCartogram);
 }
 
 function updateCartogram() {
@@ -188,11 +188,11 @@ function updateCartogram() {
     : percentageText.text(`${threshold}%`);
 
   // get type and filter counties
-  type = summaryType.node().value;
+  type = cartogramType.node().value;
   countyPaths.attr("class", (d) =>
     filterCartogramCounties(d, threshold / 100, type)
   );
-  summaryCount.textContent = d3
+  cartogramCount.textContent = d3
     .selectAll(".selected-county")
     .size()
     .toLocaleString("en-US");
@@ -219,24 +219,20 @@ function generateComparison(broadband) {
   const margin = {
     top: 30,
     bottom: 50,
-    right: 25,
-    left: 50,
+    right: 35,
+    left: 60,
   };
   const labelOffset = margin.left;
-  const width = 275 - margin.left - margin.right;
-  const height = 250 - margin.top - margin.bottom; // accounts for the height of the sticky header
+  const width = 675 - margin.left - margin.right;
+  const height = 650 - margin.top - margin.bottom; // accounts for the height of the sticky header
 
   // make SVG responsive to window size changes
   const svg = d3
-    .select("div#comparison-plot")
+    .select("div#vis-comparison")
     .append("svg")
-    .attr("preserveAspectRatio", "xMinYMin meet")
-    .attr(
-      "viewBox",
-      `0 0 ${width + margin.left + margin.right + labelOffset} ${
-        height + margin.top + margin.bottom
-      }`
-    )
+    .attr("class", "chart")
+    .attr("width", width + margin.left + margin.right + labelOffset)
+    .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
@@ -245,14 +241,18 @@ function generateComparison(broadband) {
 
   y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 
-  const z = d3.scaleLinear().domain([70, 11000000]).range([0.75, 10]);
+  const z = d3.scaleLinear().domain([70, 11000000]).range([4, 40]);
 
   svg
     .append("g")
     .attr("transform", `translate(0, ${height})`)
+    .attr("class", "axis")
     .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(".0%")));
 
-  svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")));
+  svg
+    .append("g")
+    .attr("class", "axis")
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")));
 
   // add axes labels
   svg
@@ -260,11 +260,9 @@ function generateComparison(broadband) {
     .attr("text-anchor", "end")
     .attr("x", width)
     .attr("y", height + margin.bottom * 0.75)
-    .attr("class", "svg-axis-label")
-    .attr("id", "comparison-availability-line")
-    .style("background-color", "#41b6c4")
-    .text("Availability (% of population)")
-    .style("color", "white");
+    .attr("class", "axis-label")
+    .attr("id", "comparison-x")
+    .text("Availability (% of county population)");
 
   svg
     .append("text")
@@ -272,9 +270,35 @@ function generateComparison(broadband) {
     .attr("x", -margin.top / 2)
     .attr("y", -margin.left + 10)
     .attr("transform", "rotate(-90)")
-    .attr("class", "svg-axis-label")
-    .attr("id", "comparison-usage-line")
-    .text("Usage (% of population)");
+    .attr("class", "axis-label")
+    .attr("id", "comparison-y")
+    .text("Usage (% of county population)");
+
+  // add tooltip div
+  const tooltip = d3
+    .select("#vis-comparison")
+    .append("div")
+    .style("visibility", "hidden")
+    .attr("class", "tooltip");
+
+  let hover = function (event, d) {
+    tooltip.style("visibility", "visible").html(
+      `<div class="tooltip-contents"><div class="tooltip-title"><span class="tooltip-name">
+          ${d.name}, ${d.state}</span><span class="tooltip-score">
+          ${d.usage}%</span></div><div class="tooltip-address">
+          ${d.availability}%</div></div>`
+    );
+  };
+
+  let move_hover = function (event, d) {
+    tooltip
+      .style("top", event.pageY - 5 + "px")
+      .style("left", event.pageX + 5 + "px");
+  };
+
+  let exit_hover = function (event, d) {
+    tooltip.style("visibility", "hidden");
+  };
 
   // place scales correctly within container
   comparisonPoints = svg
@@ -285,7 +309,10 @@ function generateComparison(broadband) {
     .attr("cx", (d) => x(d.availability))
     .attr("cy", (d) => y(d.usage))
     .attr("r", (d) => z(d.total))
-    .attr("class", "comparison-selected");
+    .attr("class", "comparison-selected")
+    .on("mouseover", hover)
+    .on("mousemove", move_hover)
+    .on("mouseout", exit_hover);
 
   // add median lines to the scatter plot
   availabilityLine = svg
@@ -294,8 +321,8 @@ function generateComparison(broadband) {
     .attr("x2", x(availabilityAvg))
     .attr("y1", y(0))
     .attr("y2", y(1))
-    .attr("stroke", "#2c7fb8")
-    .attr("stroke-width", 0.75);
+    .attr("class", "line")
+    .attr("id", "availability-line");
 
   usageLine = svg
     .append("line")
@@ -303,8 +330,8 @@ function generateComparison(broadband) {
     .attr("x2", x(1))
     .attr("y1", y(usageAvg))
     .attr("y2", y(usageAvg))
-    .attr("stroke", "#081d58")
-    .attr("stroke-width", 0.75);
+    .attr("class", "line")
+    .attr("id", "usage-line");
 }
 
 // SOURCE: https://www.tutorialsteacher.com/d3js/animation-with-d3js

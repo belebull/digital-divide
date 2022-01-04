@@ -38,7 +38,7 @@ a
   margin 0 2px
 
 
-/*CHART STYLES*/
+/*VISUALIZATION STYLES: Headers*/
 .header
   text-align center
 
@@ -53,14 +53,17 @@ a
 .subtitle .highlight
   font-weight 600
   background-color $dark-blue
-  padding 7px
+  padding 7px 10px
   color white
+  border-radius 3px
+  &.highlight-light
+    background-color $light-blue
 
 .inputs
   font-family $sans-fb
   display inline-flex
   flex-direction column
-  font-size $large
+  font-size large
   padding 10px 2px
 
 .inputs.selection
@@ -68,9 +71,27 @@ a
   border none
   border-bottom 3px solid blue
   color $black
-  font-size 18px
+  font-size large
   background-color: none
   padding 10px
+
+.note
+    font-size small
+    font-style: italic
+    color $gray-dark
+    line-height: 28px
+    margin 10px
+
+/*VISUALIZATION STYLES: Chart Components*/
+.chart
+  display block
+  margin 0 auto
+  height: 100%
+
+.axis-label
+  font-family 'Roboto'
+  font-size small
+  font-weight 600
 
 
 // OLD STYLES
